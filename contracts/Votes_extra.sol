@@ -1,4 +1,5 @@
-// // SPDX-License-Identifier: MIT
+
+//!! Version ที่เจ้าของผลงานตั้งรางวัลได้ และใช้งานได้ แต่ไมใช้เจ้าของ Campagine ที่เป็นผู้ตั้งรางวัล
 // pragma solidity ^0.8.9;
 
 // import "@openzeppelin/contracts/governance/Governor.sol";
@@ -24,13 +25,17 @@
 //         string description
 //     );
 //     event Voted(uint256 proposalId, address voter, bool support);
-//     // event ProposalExecuted(uint256 proposalId);
-//     // event ProposalCanceled(uint256 proposalId);
+//     event RewardsDistributed(
+//         uint256 proposalId,
+//         uint256 totalRewards,
+//         uint256 ownerReward,
+//         uint256 voterRewards
+//     );
 
 //     mapping(uint256 => Proposal) private proposals;
 //     uint256 private proposalCounter;
 //     address private owner;
-//     ERC20 private rewardToken; // The reward token contract address
+//     ERC20 private _rewardToken; // Declare the ERC20 token contract variable
 
 //     struct Proposal {
 //         address creator;
@@ -39,25 +44,27 @@
 //         uint256 noVotes;
 //         bool executed;
 //         bool canceled;
+//         address[] voters;
+//         uint256[] votes;
+//         uint256 rewardAmount; // Amount of reward for the winning owner and voters
 //     }
 
 //     constructor(
-//         IVotes _token,
-//         TimelockController _timelock,
-//         address _rewardTokenAddress // Address of the reward token contract
+//         address rewardToken, // Pass the ERC20 token contract address during deployment
+//         TimelockController _timelock
 //     )
 //         Governor("MyGovernor")
 //         GovernorSettings(7200 /* 1 day */, 7200 /* 1 day */, 0)
-//         GovernorVotes(_token)
+//         GovernorVotes(IVotes(rewardToken)) // Pass the reward token address to the GovernorVotes constructor
 //         GovernorVotesQuorumFraction(4)
 //         GovernorTimelockControl(_timelock)
 //     {
 //         owner = msg.sender; // Set the contract deployer as the owner
-//         rewardToken = ERC20(_rewardTokenAddress);
+//         _rewardToken = ERC20(rewardToken); // Initialize the ERC20 token contract
 //     }
 
-//     // Create a new project proposal
-//     function createProject(string memory description) external {
+//     // Create a new project proposal with reward amount
+//     function createProject(string memory description, uint256 rewardAmount) external {
 //         proposalCounter++;
 //         proposals[proposalCounter] = Proposal(
 //             msg.sender,
@@ -65,7 +72,10 @@
 //             0,
 //             0,
 //             false,
-//             false
+//             false,
+//             new address[](0),
+//             new uint256[](0),
+//             rewardAmount
 //         );
 //         emit ProposalCreated(proposalCounter, msg.sender, description);
 //     }
@@ -86,15 +96,10 @@
 //             proposals[proposalId].noVotes += votes;
 //         }
 
+//         proposals[proposalId].voters.push(msg.sender);
+//         proposals[proposalId].votes.push(votes);
+
 //         emit Voted(proposalId, msg.sender, support);
-//     }
-
-//     // Send reward tokens to a recipient
-//     function sendTokens(address recipient, uint256 amount) external {
-//         require(msg.sender == owner, "Only the owner can send reward tokens");
-//         require(amount > 0, "Amount must be greater than zero");
-
-//         rewardToken.transfer(recipient, amount);
 //     }
 
 //     // Override the proposal threshold
@@ -124,6 +129,8 @@
 
 //         proposals[proposalId].executed = true;
 //         // emit ProposalExecuted(proposalId);
+
+//         distributeRewards(proposalId); // Distribute rewards after executing the proposal
 //     }
 
 //     // Override the cancellation of a proposal
@@ -156,17 +163,10 @@
 //         return owner;
 //     }
 
-//     //Why is this function needed?
-
-//     // Override supportsInterface function
-//     function supportsInterface(
-//         bytes4 interfaceId
-//     ) public view override(Governor, GovernorTimelockControl) returns (bool) {
-//         return super.supportsInterface(interfaceId);
-//     }
-
 //     // Custom implementation of the state function
-//     function state(uint256 proposalId)
+//     function state(
+//         uint256 proposalId
+//     )
 //         public
 //         view
 //         override(Governor, GovernorTimelockControl)
@@ -179,5 +179,44 @@
 //         } else {
 //             return super.state(proposalId);
 //         }
+//     }
+
+//     // Distribute rewards to the owner and voters
+//     function distributeRewards(uint256 proposalId) internal {
+//         Proposal storage proposal = proposals[proposalId];
+
+//         // Calculate the total reward for the proposal
+//         uint256 totalRewards = _rewardToken.balanceOf(address(this));
+
+//         // Calculate the owner's reward (reward amount for the winning owner)
+//         uint256 ownerReward = (totalRewards * proposal.rewardAmount) / 100;
+
+//         // Calculate the voters' reward (proportionate to their votes)
+//         uint256 voterRewards = totalRewards - ownerReward;
+
+//         // Transfer the rewards to the owner and voters
+//         _rewardToken.transfer(proposal.creator, ownerReward + proposal.rewardAmount);
+
+//         // Iterate through the voters and distribute their rewards
+//         uint256 totalVotes = proposal.yesVotes + proposal.noVotes;
+//         for (uint256 i = 0; i < proposal.voters.length; i++) {
+//             address voter = proposal.voters[i];
+//             uint256 votes = proposal.votes[i];
+//             uint256 voterReward = (votes * voterRewards) / totalVotes;
+//             _rewardToken.transfer(voter, voterReward);
+//         }
+
+//         emit RewardsDistributed(
+//             proposalId,
+//             totalRewards,
+//             ownerReward + proposal.rewardAmount,
+//             voterRewards
+//         );
+//     }
+
+//     function supportsInterface(
+//         bytes4 interfaceId
+//     ) public view override(Governor, GovernorTimelockControl) returns (bool) {
+//         return super.supportsInterface(interfaceId);
 //     }
 // }

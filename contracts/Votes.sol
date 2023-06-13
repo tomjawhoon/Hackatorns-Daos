@@ -21,13 +21,14 @@ contract MyGovernor is
     event ProposalCreated(
         uint256 proposalId,
         address creator,
-        string description
+        string description,
+        uint256 rewardAmount
     );
-    event Voted(uint256 proposalId, address voter, bool support);
+    event Voted(uint256 proposalId, address voter);
     event RewardsDistributed(
         uint256 proposalId,
         uint256 totalRewards,
-        uint256 ownerReward,
+        uint256 winnerReward,
         uint256 voterRewards
     );
 
@@ -45,6 +46,8 @@ contract MyGovernor is
         bool canceled;
         address[] voters;
         uint256[] votes;
+        uint256 rewardAmount;
+        address winningEntry;
     }
 
     constructor(
@@ -62,7 +65,11 @@ contract MyGovernor is
     }
 
     // Create a new project proposal
-    function createProject(string memory description) external {
+    // !! เจ้าของ แคมเปญจะใช้ตัวนี้นะ
+    function createProject(
+        string memory description,
+        uint256 rewardAmount
+    ) external {
         proposalCounter++;
         proposals[proposalCounter] = Proposal(
             msg.sender,
@@ -72,13 +79,32 @@ contract MyGovernor is
             false,
             false,
             new address[](0),
-            new uint256[](0)
+            new uint256[](0),
+            rewardAmount,
+            address(0)
         );
-        emit ProposalCreated(proposalCounter, msg.sender, description);
+        emit ProposalCreated(
+            proposalCounter,
+            msg.sender,
+            description,
+            rewardAmount
+        );
+    }
+
+    // Submit an entry for a project proposal
+    // !! เจ้าของผลงานมาส่งที่นี้
+    // !! ให้ส่งจากหน้าบ้านมานะ เรียงตามลำกับ เช่น  proposalId คนแรก ให้ส่ง 1 มา และเรียงไปเรื่อย ๆ
+    function submitEntry(uint256 proposalId) external {
+        require(
+            state(proposalId) == ProposalState.Active,
+            "Proposal is not active"
+        );
+
+        proposals[proposalId].winningEntry = msg.sender;
     }
 
     // Vote on a project proposal
-    function vote(uint256 proposalId, bool support) external {
+    function vote(uint256 proposalId) external {
         require(
             state(proposalId) == ProposalState.Active,
             "Proposal is not active"
@@ -87,16 +113,17 @@ contract MyGovernor is
         uint256 votes = getVotes(msg.sender, block.number);
         require(votes > 0, "You do not have any voting power");
 
-        if (support) {
-            proposals[proposalId].yesVotes += votes;
-        } else {
-            proposals[proposalId].noVotes += votes;
-        }
+        // if (support) {
+        //     proposals[proposalId].yesVotes += votes;
+        // } else {
+        //     proposals[proposalId].noVotes += votes;
+        // }
 
         proposals[proposalId].voters.push(msg.sender);
         proposals[proposalId].votes.push(votes);
 
-        emit Voted(proposalId, msg.sender, support);
+        // !! proposalId ผลงาน ที่โหสค msg.sender = คนโหสค
+        emit Voted(proposalId, msg.sender);
     }
 
     // Override the proposal threshold
@@ -106,7 +133,7 @@ contract MyGovernor is
         override(Governor, GovernorSettings)
         returns (uint256)
     {
-        return 1; // Only the owner can create a proposal
+        return 1; // Only one proposal is required to start voting
     }
 
     // Override the execution of a proposal
@@ -120,6 +147,10 @@ contract MyGovernor is
         require(
             proposals[proposalId].creator == owner,
             "Unauthorized executor"
+        );
+        require(
+            proposals[proposalId].winningEntry != address(0),
+            "Winning entry not selected"
         );
 
         // Execute the proposal logic here
@@ -178,21 +209,21 @@ contract MyGovernor is
         }
     }
 
-    // Distribute rewards to the owner and voters
+    // Distribute rewards to the winning entry and voters
     function distributeRewards(uint256 proposalId) internal {
         Proposal storage proposal = proposals[proposalId];
 
         // Calculate the total reward for the proposal
         uint256 totalRewards = _rewardToken.balanceOf(address(this));
 
-        // Calculate the owner's reward (50% of the total rewards)
-        uint256 ownerReward = totalRewards / 2;
+        // Calculate the winner's reward (70% of the total rewards)
+        uint256 winnerReward = (totalRewards * 70) / 100;
 
-        // Calculate the voters' reward (proportionate to their votes)
-        uint256 voterRewards = totalRewards - ownerReward;
+        // Calculate the voters' reward (30% of the total rewards)
+        uint256 voterRewards = totalRewards - winnerReward;
 
-        // Transfer the rewards to the owner and voters
-        _rewardToken.transfer(proposal.creator, ownerReward);
+        // Transfer the reward to the winning entry
+        _rewardToken.transfer(proposal.winningEntry, winnerReward);
 
         // Iterate through the voters and distribute their rewards
         uint256 totalVotes = proposal.yesVotes + proposal.noVotes;
@@ -206,7 +237,7 @@ contract MyGovernor is
         emit RewardsDistributed(
             proposalId,
             totalRewards,
-            ownerReward,
+            winnerReward,
             voterRewards
         );
     }
