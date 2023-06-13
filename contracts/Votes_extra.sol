@@ -1,5 +1,4 @@
-
-//!! Version ที่เจ้าของผลงานตั้งรางวัลได้ และใช้งานได้ แต่ไมใช้เจ้าของ Campagine ที่เป็นผู้ตั้งรางวัล
+// // SPDX-License-Identifier: MIT
 // pragma solidity ^0.8.9;
 
 // import "@openzeppelin/contracts/governance/Governor.sol";
@@ -22,13 +21,14 @@
 //     event ProposalCreated(
 //         uint256 proposalId,
 //         address creator,
-//         string description
+//         string description,
+//         uint256 rewardAmount
 //     );
-//     event Voted(uint256 proposalId, address voter, bool support);
+//     event Voted(uint256 proposalId, address voter);
 //     event RewardsDistributed(
 //         uint256 proposalId,
 //         uint256 totalRewards,
-//         uint256 ownerReward,
+//         uint256 winnerReward,
 //         uint256 voterRewards
 //     );
 
@@ -46,7 +46,8 @@
 //         bool canceled;
 //         address[] voters;
 //         uint256[] votes;
-//         uint256 rewardAmount; // Amount of reward for the winning owner and voters
+//         uint256 rewardAmount;
+//         address winningEntry;
 //     }
 
 //     constructor(
@@ -63,8 +64,12 @@
 //         _rewardToken = ERC20(rewardToken); // Initialize the ERC20 token contract
 //     }
 
-//     // Create a new project proposal with reward amount
-//     function createProject(string memory description, uint256 rewardAmount) external {
+//     // Create a new project proposal
+//     // !! เจ้าของ แคมเปญจะใช้ตัวนี้นะ
+//     function createProject(
+//         string memory description,
+//         uint256 rewardAmount
+//     ) external {
 //         proposalCounter++;
 //         proposals[proposalCounter] = Proposal(
 //             msg.sender,
@@ -75,13 +80,53 @@
 //             false,
 //             new address[](0),
 //             new uint256[](0),
+//             rewardAmount,
+//             address(0)
+//         );
+//         emit ProposalCreated(
+//             proposalCounter,
+//             msg.sender,
+//             description,
 //             rewardAmount
 //         );
-//         emit ProposalCreated(proposalCounter, msg.sender, description);
+//     }
+
+//     // Submit an entry for a project proposal
+//     // !! เจ้าของผลงานมาส่งที่นี้
+//     // !! ให้ส่งจากหน้าบ้านมานะ เรียงตามลำกับ เช่น  proposalId คนแรก ให้ส่ง 1 มา และเรียงไปเรื่อย ๆ
+//     function submitEntry(uint256 proposalId) external {
+//         require(
+//             state(proposalId) == ProposalState.Active,
+//             "Proposal is not active"
+//         );
+
+//         proposals[proposalId].winningEntry = msg.sender;
 //     }
 
 //     // Vote on a project proposal
-//     function vote(uint256 proposalId, bool support) external {
+//     // function vote(uint256 proposalId) external {
+//     //     require(
+//     //         state(proposalId) == ProposalState.Active,
+//     //         "Proposal is not active"
+//     //     );
+
+//     //     uint256 votes = getVotes(msg.sender, block.number);
+//     //     require(votes > 0, "You do not have any voting power");
+
+//     //     // if (support) {
+//     //     //     proposals[proposalId].yesVotes += votes;
+//     //     // } else {
+//     //     //     proposals[proposalId].noVotes += votes;
+//     //     // }
+
+//     //     proposals[proposalId].voters.push(msg.sender);
+//     //     proposals[proposalId].votes.push(votes);
+
+//     //     // !! proposalId ผลงาน ที่โหสค msg.sender = คนโหสค
+//     //     emit Voted(proposalId, msg.sender);
+//     // }
+
+//     function vote(uint256 proposalId) external {
 //         require(
 //             state(proposalId) == ProposalState.Active,
 //             "Proposal is not active"
@@ -90,16 +135,22 @@
 //         uint256 votes = getVotes(msg.sender, block.number);
 //         require(votes > 0, "You do not have any voting power");
 
-//         if (support) {
-//             proposals[proposalId].yesVotes += votes;
-//         } else {
-//             proposals[proposalId].noVotes += votes;
-//         }
+//         proposals[proposalId].yesVotes += votes;
 
 //         proposals[proposalId].voters.push(msg.sender);
 //         proposals[proposalId].votes.push(votes);
 
-//         emit Voted(proposalId, msg.sender, support);
+//         emit Voted(proposalId, msg.sender);
+//     }
+
+//     function getVoteScore(uint256 proposalId) public view returns (int256) {
+//         require(
+//             state(proposalId) == ProposalState.Active,
+//             "Proposal is not active"
+//         );
+
+//         Proposal storage proposal = proposals[proposalId];
+//         return int256(proposal.yesVotes) - int256(proposal.noVotes);
 //     }
 
 //     // Override the proposal threshold
@@ -109,7 +160,7 @@
 //         override(Governor, GovernorSettings)
 //         returns (uint256)
 //     {
-//         return 1; // Only the owner can create a proposal
+//         return 1; // Only one proposal is required to start voting
 //     }
 
 //     // Override the execution of a proposal
@@ -123,6 +174,10 @@
 //         require(
 //             proposals[proposalId].creator == owner,
 //             "Unauthorized executor"
+//         );
+//         require(
+//             proposals[proposalId].winningEntry != address(0),
+//             "Winning entry not selected"
 //         );
 
 //         // Execute the proposal logic here
@@ -181,21 +236,21 @@
 //         }
 //     }
 
-//     // Distribute rewards to the owner and voters
+//     // Distribute rewards to the winning entry and voters
 //     function distributeRewards(uint256 proposalId) internal {
 //         Proposal storage proposal = proposals[proposalId];
 
 //         // Calculate the total reward for the proposal
 //         uint256 totalRewards = _rewardToken.balanceOf(address(this));
 
-//         // Calculate the owner's reward (reward amount for the winning owner)
-//         uint256 ownerReward = (totalRewards * proposal.rewardAmount) / 100;
+//         // Calculate the winner's reward (70% of the total rewards)
+//         uint256 winnerReward = (totalRewards * 70) / 100;
 
-//         // Calculate the voters' reward (proportionate to their votes)
-//         uint256 voterRewards = totalRewards - ownerReward;
+//         // Calculate the voters' reward (30% of the total rewards)
+//         uint256 voterRewards = totalRewards - winnerReward;
 
-//         // Transfer the rewards to the owner and voters
-//         _rewardToken.transfer(proposal.creator, ownerReward + proposal.rewardAmount);
+//         // Transfer the reward to the winning entry
+//         _rewardToken.transfer(proposal.winningEntry, winnerReward);
 
 //         // Iterate through the voters and distribute their rewards
 //         uint256 totalVotes = proposal.yesVotes + proposal.noVotes;
@@ -209,7 +264,7 @@
 //         emit RewardsDistributed(
 //             proposalId,
 //             totalRewards,
-//             ownerReward + proposal.rewardAmount,
+//             winnerReward,
 //             voterRewards
 //         );
 //     }
