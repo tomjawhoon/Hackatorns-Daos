@@ -18,6 +18,14 @@ contract MyGovernor is
     GovernorTimelockControl
 {
     // Events
+    event WorkSubmitted(
+        bytes cid,
+        uint256 proposalId,
+        address owner,
+        string workDescription,
+        string nameOwner
+    );
+
     event ProposalCreated(
         uint256 proposalId,
         address creator,
@@ -67,9 +75,10 @@ contract MyGovernor is
     }
 
     // Create a new project proposal
-    function createProject(
+    // !! Campagine start and end blocks are not used in this example
+    function createCampaign(
         string memory description,
-        uint256 rewardAmount,
+        uint256 rewardAmount, // 1000 APE COIN
         uint256 startBlock,
         uint256 endBlock
     ) external {
@@ -97,11 +106,14 @@ contract MyGovernor is
     }
 
     // Submit an entry for a project proposal
-    function submitEntry(uint256 proposalId) external {
-        require(
-            state(proposalId) == ProposalState.Active,
-            "Proposal is not active"
-        );
+    // !! Campagine start and end blocks are not used in this example
+    // !! Proposal have CID ?
+    function submitWork(
+        bytes memory cid,
+        uint256 proposalId,
+        string memory workDescription,
+        string memory nameOwner
+    ) external {
         require(
             block.number >= proposals[proposalId].startBlock,
             "Campaign has not started yet"
@@ -112,14 +124,17 @@ contract MyGovernor is
         );
 
         proposals[proposalId].winningEntry = msg.sender;
+
+        emit WorkSubmitted(
+            cid,
+            proposalId,
+            msg.sender,
+            workDescription,
+            nameOwner
+        );
     }
 
-    // Vote on a project proposal
     function vote(uint256 proposalId) external {
-        require(
-            state(proposalId) == ProposalState.Active,
-            "Proposal is not active"
-        );
         require(
             block.number >= proposals[proposalId].startBlock,
             "Campaign has not started yet"
@@ -140,7 +155,6 @@ contract MyGovernor is
         emit Voted(proposalId, msg.sender);
     }
 
-    // Get the start time of a campaign
     function getCampaignStartTime(
         uint256 proposalId
     ) public view returns (uint256) {
@@ -149,7 +163,6 @@ contract MyGovernor is
         return proposals[proposalId].startBlock;
     }
 
-    // Get the end time of a campaign
     function getCampaignEndTime(
         uint256 proposalId
     ) public view returns (uint256) {
@@ -158,16 +171,6 @@ contract MyGovernor is
         return proposals[proposalId].endBlock;
     }
 
-    function proposalThreshold()
-        public
-        pure
-        override(Governor, GovernorSettings)
-        returns (uint256)
-    {
-        return 1; // Only one proposal is required to start voting
-    }
-
-    // Override the execution of a proposal
     function _execute(
         uint256 proposalId,
         address[] memory targets,
@@ -191,7 +194,35 @@ contract MyGovernor is
         distributeRewards(proposalId); // Distribute rewards after executing the proposal
     }
 
-    // Override the cancellation of a proposal
+    // Distribute rewards to the winning entry and voters
+    function distributeRewards(uint256 proposalId) internal {
+        Proposal storage proposal = proposals[proposalId];
+
+        // Calculate the total reward for the proposal
+        uint256 totalRewards = proposal.rewardAmount;
+
+        // Calculate the reward for the winning entry
+        uint256 winnerReward = (totalRewards * 70) / 100;
+        _rewardToken.transfer(proposal.winningEntry, winnerReward);
+
+        // Calculate the reward for the voters
+        uint256 voterRewards = (totalRewards * 30) / 100;
+
+        for (uint256 i = 0; i < proposal.voters.length; i++) {
+            address voter = proposal.voters[i];
+            uint256 votes = proposal.votes[i];
+            uint256 reward = (voterRewards * votes) / proposal.yesVotes;
+            _rewardToken.transfer(voter, reward);
+        }
+
+        emit RewardsDistributed(
+            proposalId,
+            totalRewards,
+            winnerReward,
+            voterRewards
+        );
+    }
+
     function _cancel(
         address[] memory targets,
         uint256[] memory values,
@@ -220,6 +251,15 @@ contract MyGovernor is
         return owner;
     }
 
+    function proposalThreshold()
+        public
+        pure
+        override(Governor, GovernorSettings)
+        returns (uint256)
+    {
+        return 1; // Only one proposal is required to start voting
+    }
+
     // Custom implementation of the state function
     function state(
         uint256 proposalId
@@ -243,38 +283,9 @@ contract MyGovernor is
         }
     }
 
-    // Distribute rewards to the winning entry and voters
-    function distributeRewards(uint256 proposalId) internal {
-        Proposal storage proposal = proposals[proposalId];
-
-        // Calculate the total reward for the proposal
-        uint256 totalRewards = proposal.rewardAmount;
-
-        // Calculate the reward for the winning entry
-        uint256 winnerReward = (totalRewards * 70) / 100;
-        _rewardToken.transfer(proposal.winningEntry, winnerReward);
-
-        // Calculate the reward for the voters
-        uint256 voterRewards = (totalRewards * 30) / 100;
-        for (uint256 i = 0; i < proposal.voters.length; i++) {
-            address voter = proposal.voters[i];
-            uint256 votes = proposal.votes[i];
-            uint256 reward = (voterRewards * votes) / proposal.yesVotes;
-            _rewardToken.transfer(voter, reward);
-        }
-
-        emit RewardsDistributed(
-            proposalId,
-            totalRewards,
-            winnerReward,
-            voterRewards
-        );
-    }
-
     function supportsInterface(
         bytes4 interfaceId
     ) public view override(Governor, GovernorTimelockControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
-
 }
