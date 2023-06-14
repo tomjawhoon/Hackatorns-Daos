@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./type/Proposal.sol"; // Import the Proposal struct from the separate file;
+import "./event/Events.sol"; // Import the Events contract;
 
 contract MyGovernor is
     Governor,
@@ -15,50 +17,13 @@ contract MyGovernor is
     GovernorCountingSimple,
     GovernorVotes,
     GovernorVotesQuorumFraction,
-    GovernorTimelockControl
+    GovernorTimelockControl,
+    Events // Inherit from the Events contract
 {
-    // Events
-    event WorkSubmitted(
-        bytes cid,
-        uint256 proposalId,
-        address owner,
-        string workDescription,
-        string nameOwner
-    );
-
-    event ProposalCreated(
-        uint256 proposalId,
-        address creator,
-        string description,
-        uint256 rewardAmount
-    );
-    event Voted(uint256 proposalId, address voter);
-    event RewardsDistributed(
-        uint256 proposalId,
-        uint256 totalRewards,
-        uint256 winnerReward,
-        uint256 voterRewards
-    );
-
     mapping(uint256 => Proposal) private proposals;
     uint256 private proposalCounter;
     address private owner;
     ERC20 private _rewardToken; // Declare the ERC20 token contract variable
-
-    struct Proposal {
-        address creator;
-        string description;
-        uint256 yesVotes;
-        uint256 noVotes;
-        bool executed;
-        bool canceled;
-        address[] voters;
-        uint256[] votes;
-        uint256 rewardAmount;
-        address winningEntry;
-        uint256 startBlock;
-        uint256 endBlock;
-    }
 
     constructor(
         address rewardToken, // Pass the ERC20 token contract address during deployment
@@ -84,18 +49,18 @@ contract MyGovernor is
     ) external {
         proposalCounter++;
         proposals[proposalCounter] = Proposal(
-            msg.sender,
-            description,
-            0,
-            0,
-            false,
-            false,
-            new address[](0),
-            new uint256[](0),
-            rewardAmount,
-            address(0),
-            startBlock,
-            endBlock
+            msg.sender, // Set the proposal creator as the sender
+            description, // Set the proposal description
+            0, // Set the yes votes to 0
+            0, //   Set the no votes to 0
+            false, // Set the executed flag to false
+            false, // Set the canceled flag to false
+            new address[](0), // Initialize the voters array
+            new uint256[](0), // Initialize the votes array
+            rewardAmount, // Set the reward amount
+            address(0), // Set the winning entry to the zero address
+            startBlock, // Set the start block
+            endBlock // Set the end block
         );
         emit ProposalCreated(
             proposalCounter,
@@ -134,21 +99,15 @@ contract MyGovernor is
             nameOwner
         );
 
-        distributeRewards(proposalId); // Distribute rewards after executing the proposal
+        distributeRewards(proposalId);
     }
 
-    // Distribute rewards to the winning entry and voters
+    //  !! Distribute rewards to the winning entry and voters
     function distributeRewards(uint256 proposalId) internal {
         Proposal storage proposal = proposals[proposalId];
-
-        // Calculate the total reward for the proposal
         uint256 totalRewards = proposal.rewardAmount;
-
-        // Calculate the reward for the winning entry
         uint256 winnerReward = (totalRewards * 70) / 100;
         _rewardToken.transfer(proposal.winningEntry, winnerReward);
-
-        // Calculate the reward for the voters
         uint256 voterRewards = (totalRewards * 30) / 100;
 
         for (uint256 i = 0; i < proposal.voters.length; i++) {
@@ -166,6 +125,7 @@ contract MyGovernor is
         );
     }
 
+    // !! Campagine start and end blocks are not used in this example 
     function claimRewards(uint256 proposalId) external {
         Proposal storage proposal = proposals[proposalId];
         require(
@@ -213,6 +173,8 @@ contract MyGovernor is
 
         return rewardAmount;
     }
+
+    // !! Below functions are not used in this example form Goveror
 
     function _cancel(
         address[] memory targets,
