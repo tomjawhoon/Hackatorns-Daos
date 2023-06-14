@@ -2,12 +2,14 @@ import { ethers } from 'hardhat'
 import { Signer } from 'ethers'
 import { expect } from 'chai'
 
-describe('MyGovernor', function () {
+describe('MyGovernor', async () => {
   let owner: Signer
   let user1: Signer
   let user2: Signer
   let governor: any
   let rewardToken: any
+
+  
 
   beforeEach(async function () {
     ;[owner, user1, user2] = await ethers.getSigners()
@@ -41,13 +43,17 @@ describe('MyGovernor', function () {
     await governor.vote(proposalId)
 
     // Execute the proposal
-    await governor.execute(proposalId, [], [], [], '0x')
+    await governor.execute(proposalId, [], [], [], 'To the moon')
 
     // Retrieve the reward token balance for the winning entry and voters
     const winningEntryBalance = await rewardToken.balanceOf(
       await user2.getAddress(),
     )
+
+    console.log("winningEntryBalance", winningEntryBalance)
     const voterBalance = await rewardToken.balanceOf(await user1.getAddress())
+
+    console.log("voterBalance", voterBalance)
 
     // Calculate the expected reward amounts
     const winnerReward = Math.floor((rewardAmount * 70) / 100)
@@ -79,7 +85,8 @@ describe('MyGovernor', function () {
     await governor.vote(proposalId)
 
     // Execute the proposal (should not distribute rewards)
-    await governor.execute(proposalId, [], [], [], '0x')
+    const test = await governor.execute(proposalId, [], [], [], '0x')
+      console.log(test)
 
     // Retrieve the reward token balance for the winning entry and voters
     const winningEntryBalance = await rewardToken.balanceOf(
