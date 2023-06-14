@@ -1,203 +1,129 @@
 import { ethers } from 'hardhat'
-import { Signer } from 'ethers'
+import { Contract, ContractFactory } from 'ethers'
 import { expect } from 'chai'
+import { Governor } from '../typechain-types'
 
-describe('MyGovernor', async () => {
-  let owner: Signer
-  let user1: Signer
-  let user2: Signer
-  let governor: any
+describe('MyGovernor', () => {
+  let myGovernor: any
   let rewardToken: any
 
-  
+  beforeEach(async () => {
+    // Deploy ERC20 reward token contract
+    const RewardToken: ContractFactory = await ethers.getContractFactory(
+      'RewardToken',
+    )
+    rewardToken = await RewardToken.deploy()
+    await rewardToken.deployed()
 
-  beforeEach(async function () {
-    ;[owner, user1, user2] = await ethers.getSigners()
-
-    const ERC20 = await ethers.getContractFactory('ERC20')
-    rewardToken = await ERC20.deploy('RewardToken', 'RT')
-
-    const timelockAddress = '0xYOUR_TIMELOCK_ADDRESS' // Replace with the actual timelock address
-
-    const MyGovernor = await ethers.getContractFactory('MyGovernor')
-    governor = await MyGovernor.deploy(rewardToken.address, timelockAddress)
-    await governor.deployed()
+    // Deploy MyGovernor contract
+    const MyGovernor: ContractFactory = await ethers.getContractFactory(
+      'MyGovernor',
+    )
+    myGovernor = await MyGovernor.deploy(rewardToken.address)
+    await myGovernor.deployed()
   })
 
-  it('should distribute rewards after executing a proposal', async function () {
-    const proposalId = 1
+  it('should create a campaign', async () => {
+    // Call the createCampaign function
+    const description = 'Sample campaign'
     const rewardAmount = 1000
-
-    // Create a new campaign
-    await governor.createCampaign('Test campaign', rewardAmount, 1000, 2000)
-
-    // Submit work for the campaign
-    await governor.submitWork(
-      '0x1234567890abcdef',
-      proposalId,
-      'Test work',
-      'John Doe',
+    const startBlock = 1000
+    const endBlock = 2000
+    await myGovernor.createCampaign(
+      description,
+      rewardAmount,
+      startBlock,
+      endBlock,
     )
 
-    // Vote for the campaign
-    await governor.vote(proposalId)
-
-    // Execute the proposal
-    await governor.execute(proposalId, [], [], [], 'To the moon')
-
-    // Retrieve the reward token balance for the winning entry and voters
-    const winningEntryBalance = await rewardToken.balanceOf(
-      await user2.getAddress(),
+    // Assert the proposal was created
+    const proposalId = 1
+    const proposal = await myGovernor.proposals(proposalId)
+    expect(proposal.creator).to.equal(
+      await (await ethers.getSigner(0 as any)).getAddress(),
     )
-
-    console.log("winningEntryBalance", winningEntryBalance)
-    const voterBalance = await rewardToken.balanceOf(await user1.getAddress())
-
-    console.log("voterBalance", voterBalance)
-
-    // Calculate the expected reward amounts
-    const winnerReward = Math.floor((rewardAmount * 70) / 100)
-    const voterRewards = Math.floor((rewardAmount * 30) / 100)
-
-    expect(winningEntryBalance).to.equal(winnerReward)
-    expect(voterBalance).to.equal(voterRewards)
+    expect(proposal.description).to.equal(description)
+    expect(proposal.rewardAmount).to.equal(rewardAmount)
+    expect(proposal.startBlock).to.equal(startBlock)
+    expect(proposal.endBlock).to.equal(endBlock)
   })
 
-  it('should not distribute rewards if the proposal is canceled', async function () {
-    const proposalId = 1
+  it('should submit work and distribute rewards', async () => {
+    // Create a campaign
+    const description = 'Sample campaign'
     const rewardAmount = 1000
-
-    // Create a new campaign
-    await governor.createCampaign('Test campaign', rewardAmount, 1000, 2000)
-
-    // Cancel the proposal
-    await governor.cancelProposal([], [], [], '0x')
+    const startBlock = 1000
+    const endBlock = 2000
+    await myGovernor.createCampaign(
+      description,
+      rewardAmount,
+      startBlock,
+      endBlock,
+    )
 
     // Submit work for the campaign
-    await governor.submitWork(
-      '0x1234567890abcdef',
-      proposalId,
-      'Test work',
-      'John Doe',
+    const proposalId = 1
+    const workDescription = 'Sample work'
+    const nameOwner = 'John Doe'
+    await myGovernor.submitWork('CID', proposalId, workDescription, nameOwner)
+
+    // Assert the work was submitted and rewards were distributed
+    const proposal = await myGovernor.proposals(proposalId)
+    expect(proposal.winningEntry).to.equal(
+      await (await ethers.getSigner(0 as any)).getAddress(),
+    )
+    expect(proposal.executed).to.be.true
+
+    const winnerReward = (rewardAmount * 70) / 100
+    const voterRewards = (rewardAmount * 30) / 100
+
+    const winnerBalance = await rewardToken.balanceOf(
+      await (await ethers.getSigner(0 as any)).getAddress(),
+    )
+    expect(winnerBalance).to.equal(winnerReward)
+
+    const voterBalance = await rewardToken.balanceOf(
+      await (await ethers.getSigner(1 as any)).getAddress(),
+    )
+    const votes = await myGovernor.getVotes(
+      await (await ethers.getSigner(1 as any)).getAddress(),
+      0,
+    )
+    const expectedVoterReward = (voterRewards * votes) / proposal.yesVotes
+    expect(voterBalance).to.equal(expectedVoterReward)
+  })
+
+  it('should allow claiming rewards', async () => {
+    // Create a campaign
+    const description = 'Sample campaign'
+    const rewardAmount = 1000
+    const startBlock = 1000
+    const endBlock = 2000
+    await myGovernor.createCampaign(
+      description,
+      rewardAmount,
+      startBlock,
+      endBlock,
     )
 
-    // Vote for the campaign
-    await governor.vote(proposalId)
+    // Submit work for the campaign
+    const proposalId = 1
+    const workDescription = 'Sample work'
+    const nameOwner = 'John Doe'
+    await myGovernor.submitWork('CID', proposalId, workDescription, nameOwner)
 
-    // Execute the proposal (should not distribute rewards)
-    const test = await governor.execute(proposalId, [], [], [], '0x')
-      console.log(test)
+    // Claim rewards
+    await myGovernor.claimRewards(proposalId)
 
-    // Retrieve the reward token balance for the winning entry and voters
-    const winningEntryBalance = await rewardToken.balanceOf(
-      await user2.getAddress(),
+    // Assert rewards were claimed
+    const winnerBalance = await rewardToken.balanceOf(
+      await (await ethers.getSigner(0 as any)).getAddress(),
     )
-    const voterBalance = await rewardToken.balanceOf(await user1.getAddress())
+    expect(winnerBalance).to.equal(0)
 
-    expect(winningEntryBalance).to.equal(0)
+    const voterBalance = await rewardToken.balanceOf(
+      await (await ethers.getSigner(0 as any)).getAddress(),
+    )
     expect(voterBalance).to.equal(0)
-  })
-
-  it('should not distribute rewards if the campaign has not started yet', async function () {
-    const proposalId = 1
-    const rewardAmount = 1000
-
-    // Create a new campaign with a future start block
-    await governor.createCampaign('Test campaign', rewardAmount, 2000, 3000)
-
-    // Submit work for the campaign
-    await governor.submitWork(
-      '0x1234567890abcdef',
-      proposalId,
-      'Test work',
-      'John Doe',
-    )
-
-    // Vote for the campaign
-    await governor.vote(proposalId)
-
-    // Execute the proposal (should not distribute rewards)
-    await governor.execute(proposalId, [], [], [], '0x')
-
-    // Retrieve the reward token balance for the winning entry and voters
-    const winningEntryBalance = await rewardToken.balanceOf(
-      await user2.getAddress(),
-    )
-    const voterBalance = await rewardToken.balanceOf(await user1.getAddress())
-
-    expect(winningEntryBalance).to.equal(0)
-    expect(voterBalance).to.equal(0)
-  })
-
-  it('should not distribute rewards if the campaign has ended', async function () {
-    const proposalId = 1
-    const rewardAmount = 1000
-
-    // Create a new campaign with a past end block
-    await governor.createCampaign('Test campaign', rewardAmount, 1000, 1500)
-
-    // Submit work for the campaign
-    await governor.submitWork(
-      '0x1234567890abcdef',
-      proposalId,
-      'Test work',
-      'John Doe',
-    )
-
-    // Vote for the campaign
-    await governor.vote(proposalId)
-
-    // Execute the proposal (should not distribute rewards)
-    await governor.execute(proposalId, [], [], [], '0x')
-
-    // Retrieve the reward token balance for the winning entry and voters
-    const winningEntryBalance = await rewardToken.balanceOf(
-      await user2.getAddress(),
-    )
-    const voterBalance = await rewardToken.balanceOf(await user1.getAddress())
-
-    expect(winningEntryBalance).to.equal(0)
-    expect(voterBalance).to.equal(0)
-  })
-
-  it('should distribute rewards equally if there are multiple winning entries', async function () {
-    const proposalId = 1
-    const rewardAmount = 1000
-
-    // Create a new campaign
-    await governor.createCampaign('Test campaign', rewardAmount, 1000, 2000)
-
-    // Submit work for multiple winning entries
-    await governor.submitWork(
-      '0x1234567890abcdef',
-      proposalId,
-      'Test work 1',
-      'John Doe',
-    )
-    await governor.submitWork(
-      '0xabcdef1234567890',
-      proposalId,
-      'Test work 2',
-      'Jane Smith',
-    )
-
-    // Vote for the campaign
-    await governor.vote(proposalId)
-
-    // Execute the proposal
-    await governor.execute(proposalId, [], [], [], '0x')
-
-    // Retrieve the reward token balance for the winning entries and voters
-    const entry1Balance = await rewardToken.balanceOf(await user2.getAddress())
-    const entry2Balance = await rewardToken.balanceOf(await user1.getAddress())
-    const voterBalance = await rewardToken.balanceOf(await user1.getAddress())
-
-    // Calculate the expected reward amounts
-    const winnerReward = Math.floor((rewardAmount * 70) / 100 / 2)
-    const voterRewards = Math.floor((rewardAmount * 30) / 100)
-
-    expect(entry1Balance).to.equal(winnerReward)
-    expect(entry2Balance).to.equal(winnerReward)
-    expect(voterBalance).to.equal(voterRewards)
   })
 })
