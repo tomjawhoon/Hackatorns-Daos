@@ -145,21 +145,38 @@ contract MyGovernor is
         return rewardAmount;
     }
 
+    // !! Version Nong Mah
+
+    // function getWinner(uint256 campaignId) public view returns (uint256) {
+    //     Campaign storage campaign = campaigns[campaignId];
+    //     uint256 bestScore = 0;
+    //     uint256 winnerId;
+    //     // Proposal storage proposal = proposals[campaign.proposalId];
+    //     for (uint256 i = 0; i < campaign.proposalId.length; i++) {
+    //         Proposal storage proposal = proposals[i];
+    //         winnerId = proposal.proposalId;
+    //         if (proposal.voters.length > bestScore) {
+    //             bestScore = proposal.voters.length;
+    //             winnerId = proposal.proposalId;
+    //         }
+    //     }
+    //     return winnerId;
+    // }
+
     function getWinner(uint256 campaignId) public view returns (uint256) {
         Campaign storage campaign = campaigns[campaignId];
         uint256 bestScore = 0;
         uint256 winnerId;
-        // Proposal storage proposal = proposals[campaign.proposalId];
 
         for (uint256 i = 0; i < campaign.proposalId.length; i++) {
-            Proposal storage proposal = proposals[i];
-            winnerId = proposal.proposalId;
+            Proposal storage proposal = proposals[campaign.proposalId[i]];
             if (proposal.voters.length > bestScore) {
                 bestScore = proposal.voters.length;
                 winnerId = proposal.proposalId;
             }
         }
-        return winnerId;
+
+        return bestScore;
     }
 
     function getCampaignStartTime(
@@ -191,6 +208,7 @@ contract MyGovernor is
         return false;
     }
 
+    // !! เวลาให้กดโหวดส่งเข้ามาตัวนี้นะ
     function vote(
         uint256 proposalId,
         address voter,
