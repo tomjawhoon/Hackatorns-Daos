@@ -20,6 +20,7 @@ contract MyGovernor is
     GovernorTimelockControl,
     Events // Inherit from the Events contract
 {
+
     mapping(uint256 => Proposal) private proposals;
     uint256 private proposalCounter;
     address private owner;
@@ -42,25 +43,25 @@ contract MyGovernor is
     // Create a new project proposal
     // !! Campagine start and end blocks are not used in this example
     function createCampaign(
-        string memory description,
-        uint256 rewardAmount, // 1000 APE COIN
-        uint256 startBlock,
-        uint256 endBlock
+        string memory description, // !! Discription of the proposal
+        uint256 rewardAmount, // !! Ex 1000 APE COIN
+        uint256 startBlock, // !! Time to start the proposal
+        uint256 endBlock // !! End to end the proposal
     ) external {
         proposalCounter++;
         proposals[proposalCounter] = Proposal(
-            msg.sender, // Set the proposal creator as the sender
-            description, // Set the proposal description
+            msg.sender, // !! Set the proposal creator as the sender
+            description, // !! Set the proposal description
             0, // Set the yes votes to 0
             0, //   Set the no votes to 0
             false, // Set the executed flag to false
             false, // Set the canceled flag to false
             new address[](0), // Initialize the voters array
             new uint256[](0), // Initialize the votes array
-            rewardAmount, // Set the reward amount
+            rewardAmount, // !! Set the reward amount
             address(0), // Set the winning entry to the zero address
-            startBlock, // Set the start block
-            endBlock // Set the end block
+            startBlock, // !! Set the start block
+            endBlock //  !! Set the end block
         );
         emit ProposalCreated(
             proposalCounter,
@@ -125,7 +126,7 @@ contract MyGovernor is
         );
     }
 
-    // !! Campagine start and end blocks are not used in this example 
+    // !! Campagine start and end blocks are not used in this example
     function claimRewards(uint256 proposalId) external {
         Proposal storage proposal = proposals[proposalId];
         require(
