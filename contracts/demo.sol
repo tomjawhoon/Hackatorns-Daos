@@ -100,31 +100,36 @@ contract MyGovernor is
             nameOwner
         );
 
-        distributeRewards(proposalId);
+        // distributeRewards(proposalId);
     }
 
-    //  !! Distribute rewards to the winning entry and voters
-    function distributeRewards(uint256 proposalId) internal {
-        Proposal storage proposal = proposals[proposalId];
-        uint256 totalRewards = proposal.rewardAmount;
-        uint256 winnerReward = (totalRewards * 70) / 100;
-        _rewardToken.transfer(proposal.winningEntry, winnerReward);
-        uint256 voterRewards = (totalRewards * 30) / 100;
+    
 
-        for (uint256 i = 0; i < proposal.voters.length; i++) {
-            address voter = proposal.voters[i];
-            uint256 votes = proposal.votes[i];
-            uint256 reward = (voterRewards * votes) / proposal.yesVotes;
-            _rewardToken.transfer(voter, reward);
-        }
+    // //  !! Distribute rewards to the winning entry and voters
+    // function distributeRewards(uint256 proposalId) internal {
+    //     Proposal storage proposal = proposals[proposalId];
+    //     uint256 totalRewards = proposal.rewardAmount;
+    //     // !! Send rewards to the winning entry
+    //     uint256 winnerReward = (totalRewards * 70) / 100;
 
-        emit RewardsDistributed(
-            proposalId,
-            totalRewards,
-            winnerReward,
-            voterRewards
-        );
-    }
+    //     //!! Send rewards to voters winner
+    //     _rewardToken.transfer(proposal.winningEntry, winnerReward);
+    //     uint256 voterRewards = (totalRewards * 30) / 100;
+
+    //     for (uint256 i = 0; i < proposal.voters.length; i++) {
+    //         address voter = proposal.voters[i];
+    //         uint256 votes = proposal.votes[i];
+    //         uint256 reward = (voterRewards * votes) / proposal.yesVotes;
+    //         _rewardToken.transfer(voter, reward);
+    //     }
+
+    //     emit RewardsDistributed(
+    //         proposalId,
+    //         totalRewards,
+    //         winnerReward,
+    //         voterRewards
+    //     );
+    // }
 
     // !! Campagine start and end blocks are not used in this example
     function claimRewards(uint256 proposalId) external {
