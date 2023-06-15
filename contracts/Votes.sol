@@ -160,21 +160,21 @@ contract MyGovernor is
         emit Voted(proposalId, msg.sender);
     }
 
-    // function getCampaignStartTime(
-    //     uint256 proposalId
-    // ) public view returns (uint256) {
-    //     require(proposalId <= proposalCounter, "Invalid proposalId");
+    function getCampaignStartTime(
+        uint256 proposalId
+    ) public view returns (uint256) {
+        require(proposalId <= proposalCounter, "Invalid proposalId");
 
-    //     return proposals[proposalId].startBlock;
-    // }
+        return proposals[proposalId].startBlock;
+    }
 
-    // function getCampaignEndTime(
-    //     uint256 proposalId
-    // ) public view returns (uint256) {
-    //     require(proposalId <= proposalCounter, "Invalid proposalId");
+    function getCampaignEndTime(
+        uint256 proposalId
+    ) public view returns (uint256) {
+        require(proposalId <= proposalCounter, "Invalid proposalId");
 
-    //     return proposals[proposalId].endBlock;
-    // }
+        return proposals[proposalId].endBlock;
+    }
 
     function proposalThreshold()
         public

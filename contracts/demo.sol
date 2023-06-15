@@ -20,9 +20,12 @@ contract MyGovernor is
     GovernorTimelockControl,
     Events // Inherit from the Events contract
 {
-
     mapping(uint256 => Proposal) private proposals;
-    uint256 private proposalCounter;
+
+    mapping(uint256 => Campaign) private campaigns;
+    // uint256 proposalId ;
+    uint256 campaignsCounter;
+    uint256 proposalCounter;
     address private owner;
     ERC20 private _rewardToken; // Declare the ERC20 token contract variable
 
@@ -42,26 +45,21 @@ contract MyGovernor is
 
     // Create a new project proposal
     // !! Campagine start and end blocks are not used in this example
+    // !! Campagine ID is not used in this example
     function createCampaign(
         string memory description, // !! Discription of the proposal
         uint256 rewardAmount, // !! Ex 1000 APE COIN
         uint256 startBlock, // !! Time to start the proposal
         uint256 endBlock // !! End to end the proposal
     ) external {
-        proposalCounter++;
-        proposals[proposalCounter] = Proposal(
+        campaignsCounter++;
+        campaigns[campaignsCounter] = Campaign(
             msg.sender, // !! Set the proposal creator as the sender
-            description, // !! Set the proposal description
-            0, // Set the yes votes to 0
-            0, //   Set the no votes to 0
-            false, // Set the executed flag to false
-            false, // Set the canceled flag to false
-            new address[](0), // Initialize the voters array
-            new uint256[](0), // Initialize the votes array
-            rewardAmount, // !! Set the reward amount
-            address(0), // Set the winning entry to the zero address
+            campaignsCounter, // Initialize the campaign array
+            new uint256[](0), // !! Set the campaign ID
             startBlock, // !! Set the start block
-            endBlock //  !! Set the end block
+            endBlock, //  !! Set the end block
+            rewardAmount // !! Set the reward amount
         );
         emit ProposalCreated(
             proposalCounter,
@@ -75,80 +73,113 @@ contract MyGovernor is
     // !! Proposal have CID ?
     function submitWork(
         bytes memory cid,
-        uint256 proposalId,
+        // uint256 proposalId,
         string memory workDescription,
-        string memory nameOwner
+        address owner
     ) external {
-        require(
-            block.number >= proposals[proposalId].startBlock,
-            "Campaign has not started yet"
+        proposalCounter++;
+        proposals[proposalCounter] = Proposal(
+            proposalCounter,
+            msg.sender, // !! Set the proposal creator as the sender
+            workDescription, // !! Set the proposal description
+            0, // Set the yes votes to 0
+            0, //   Set the no votes to 0
+            false, // Set the executed flag to false
+            false, // Set the canceled flag to false
+            new address[](0), // Initialize the voters array
+            new uint256[](0) // Initialize the votes array
         );
-        require(
-            block.number <= proposals[proposalId].endBlock,
-            "Campaign has already ended"
-        );
-        Proposal storage proposal = proposals[proposalId];
+
+        Proposal storage proposal = proposals[proposalCounter];
         require(!proposal.canceled, "Proposal was canceled");
         require(!proposal.executed, "Proposal was already executed");
-        proposal.winningEntry = msg.sender;
+        // proposal.winningEntry = owner;
         proposal.executed = true;
-        emit WorkSubmitted(
-            cid,
-            proposalId,
-            msg.sender,
-            workDescription,
-            nameOwner
-        );
+        emit WorkSubmitted(cid, proposalCounter, owner, workDescription);
 
         // distributeRewards(proposalId);
     }
 
-    
-
-    // //  !! Distribute rewards to the winning entry and voters
-    // function distributeRewards(uint256 proposalId) internal {
-    //     Proposal storage proposal = proposals[proposalId];
-    //     uint256 totalRewards = proposal.rewardAmount;
-    //     // !! Send rewards to the winning entry
-    //     uint256 winnerReward = (totalRewards * 70) / 100;
-
-    //     //!! Send rewards to voters winner
-    //     _rewardToken.transfer(proposal.winningEntry, winnerReward);
-    //     uint256 voterRewards = (totalRewards * 30) / 100;
-
-    //     for (uint256 i = 0; i < proposal.voters.length; i++) {
-    //         address voter = proposal.voters[i];
-    //         uint256 votes = proposal.votes[i];
-    //         uint256 reward = (voterRewards * votes) / proposal.yesVotes;
-    //         _rewardToken.transfer(voter, reward);
-    //     }
-
-    //     emit RewardsDistributed(
-    //         proposalId,
-    //         totalRewards,
-    //         winnerReward,
-    //         voterRewards
-    //     );
-    // }
-
     // !! Campagine start and end blocks are not used in this example
-    function claimRewards(uint256 proposalId) external {
-        Proposal storage proposal = proposals[proposalId];
-        require(
-            proposal.winningEntry == msg.sender ||
-                isVoter(proposalId, msg.sender),
-            "Unauthorized claimer"
-        );
-        require(proposal.executed, "Rewards not yet distributed");
+    function claimRewards(
+        uint256 campaignId,
+        address claimer,
+        uint256 proposalId
+    ) external {
+        Campaign storage campaigns = campaigns[campaignId];
+        uint256 winnerId = getWinner(campaignId);
+        Proposal storage proposal = proposals[winnerId];
+        require(proposal.creator == claimer, "Unauthorized claimer");
 
-        uint256 rewardAmount = calculateRewardAmount(proposalId, msg.sender);
+        uint256 rewardAmount = calculateRewardAmount(
+            proposalId,
+            campaignId,
+            claimer
+        );
         require(rewardAmount > 0, "No rewards to claim");
 
-        _rewardToken.transfer(msg.sender, rewardAmount);
+        _rewardToken.transfer(claimer, rewardAmount);
+    }
+
+    function calculateRewardAmount(
+        uint256 proposalId,
+        uint256 campaignId,
+        address claimer
+    ) internal view returns (uint256) {
+        Campaign storage campaign = campaigns[campaignId];
+        uint256 winnerId = getWinner(campaignId);
+        Proposal storage proposal = proposals[winnerId];
+
+        uint256 totalRewards = campaign.rewardAmount;
+        uint256 winnerReward = (totalRewards * 70) / 100;
+
+        uint256 voterRewards = (totalRewards * 30) / 100;
+        uint256 rewardAmount = 0;
+        if (proposal.creator == claimer) {
+            rewardAmount = winnerReward;
+        } else if (isVoter(proposalId, claimer)) {
+            uint256 votes = getVotes(claimer, block.number);
+            rewardAmount = (voterRewards * votes) / proposal.yesVotes;
+        }
+
+        return rewardAmount;
+    }
+
+    function getWinner(uint256 campaignId) public view returns (uint256) {
+        Campaign storage campaign = campaigns[campaignId];
+        uint256 bestScore = 0;
+        uint256 winnerId;
+        // Proposal storage proposal = proposals[campaign.proposalId];
+
+        for (uint256 i = 0; i < campaign.proposalId.length; i++) {
+            Proposal storage proposal = proposals[i];
+            winnerId = proposal.proposalId;
+            if (proposal.voters.length > bestScore) {
+                bestScore = proposal.voters.length;
+                winnerId = proposal.proposalId;
+            }
+        }
+        return winnerId;
+    }
+
+    function getCampaignStartTime(
+        uint256 campaignId
+    ) public view returns (uint256) {
+        require(campaignId <= campaignsCounter, "Invalid proposalId");
+
+        return campaigns[campaignId].startBlock;
+    }
+
+    function getCampaignEndTime(
+        uint256 campaignId
+    ) public view returns (uint256) {
+        require(campaignId <= campaignsCounter, "Invalid proposalId");
+
+        return campaigns[campaignId].endBlock;
     }
 
     function isVoter(
-        uint256 proposalId,
+        uint256 proposalId, //!! proposalCounter
         address voter
     ) internal view returns (bool) {
         Proposal storage proposal = proposals[proposalId];
@@ -160,24 +191,33 @@ contract MyGovernor is
         return false;
     }
 
-    function calculateRewardAmount(
+    function vote(
         uint256 proposalId,
-        address claimer
-    ) internal view returns (uint256) {
-        Proposal storage proposal = proposals[proposalId];
-        uint256 totalRewards = proposal.rewardAmount;
-        uint256 winnerReward = (totalRewards * 70) / 100;
-        uint256 voterRewards = (totalRewards * 30) / 100;
-        uint256 rewardAmount = 0;
+        address voter,
+        uint256 campaignId
+    ) external {
+        Campaign storage campaign = campaigns[campaignId];
+        require(
+            block.number >= campaigns[campaignId].startBlock,
+            "Campaign has not started yet"
+        );
+        require(
+            block.number <= campaigns[campaignId].endBlock,
+            "Campaign has ended"
+        );
 
-        if (proposal.winningEntry == claimer) {
-            rewardAmount = winnerReward;
-        } else if (isVoter(proposalId, claimer)) {
-            uint256 votes = getVotes(claimer, block.number);
-            rewardAmount = (voterRewards * votes) / proposal.yesVotes;
-        }
+        uint256 votes = getVotes(voter, block.number);
+        require(votes > 0, "You do not have any voting power");
 
-        return rewardAmount;
+        require(!isVoter(proposalId, voter), "Already voted");
+
+        proposals[proposalId].yesVotes += votes;
+
+        proposals[proposalId].voters.push(voter);
+        proposals[proposalId].votes.push(votes);
+
+        // !! Check Votes
+        emit Voted(proposalId, voter);
     }
 
     // !! Below functions are not used in this example form Goveror

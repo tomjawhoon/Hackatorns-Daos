@@ -4,10 +4,9 @@ pragma solidity ^0.8.9;
 contract Events {
     event WorkSubmitted(
         bytes cid,
-        uint256 proposalId,
+        uint256 proposalCounter,
         address owner,
-        string workDescription,
-        string nameOwner
+        string workDescription
     );
 
     event ProposalCreated(
