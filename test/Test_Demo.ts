@@ -21,15 +21,11 @@ describe('MyGovernor', async () => {
   })
 
   it('should create a campaign', async () => {
-    // Create a campaign
+
     const description = 'New Campaign'
     const rewardAmount = 1000
     const startBlock = 1000
     const endBlock = 2000
-
-  //   const MyGovernor: ContractFactory = await ethers.getContractFactory('MyGovernor')
-  //   myGovernor = await MyGovernor.deploy('0x123', 'Hello World') as Contract
-  //  await myGovernor.deployed()
 
     await myGovernor.createCampaign(
       description,

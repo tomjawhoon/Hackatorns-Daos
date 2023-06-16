@@ -26,34 +26,9 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../common";
+} from "../../../../common";
 
-export type CampaignStruct = {
-  creator: PromiseOrValue<string>;
-  campaignId: PromiseOrValue<BigNumberish>;
-  proposalId: PromiseOrValue<BigNumberish>[];
-  startBlock: PromiseOrValue<BigNumberish>;
-  endBlock: PromiseOrValue<BigNumberish>;
-  rewardAmount: PromiseOrValue<BigNumberish>;
-};
-
-export type CampaignStructOutput = [
-  string,
-  BigNumber,
-  BigNumber[],
-  BigNumber,
-  BigNumber,
-  BigNumber
-] & {
-  creator: string;
-  campaignId: BigNumber;
-  proposalId: BigNumber[];
-  startBlock: BigNumber;
-  endBlock: BigNumber;
-  rewardAmount: BigNumber;
-};
-
-export interface MyGovernorInterface extends utils.Interface {
+export interface GovernorVotesQuorumFractionInterface extends utils.Interface {
   functions: {
     "BALLOT_TYPEHASH()": FunctionFragment;
     "CLOCK_MODE()": FunctionFragment;
@@ -65,17 +40,11 @@ export interface MyGovernorInterface extends utils.Interface {
     "castVoteWithReason(uint256,uint8,string)": FunctionFragment;
     "castVoteWithReasonAndParams(uint256,uint8,string,bytes)": FunctionFragment;
     "castVoteWithReasonAndParamsBySig(uint256,uint8,string,bytes,uint8,bytes32,bytes32)": FunctionFragment;
-    "claimRewards(uint256,address,uint256)": FunctionFragment;
     "clock()": FunctionFragment;
-    "createCampaign(string,uint256,uint256,uint256)": FunctionFragment;
     "eip712Domain()": FunctionFragment;
     "execute(address[],uint256[],bytes[],bytes32)": FunctionFragment;
-    "getAllCampaigns()": FunctionFragment;
-    "getCampaignEndTime(uint256)": FunctionFragment;
-    "getCampaignStartTime(uint256)": FunctionFragment;
     "getVotes(address,uint256)": FunctionFragment;
     "getVotesWithParams(address,uint256,bytes)": FunctionFragment;
-    "getWinner(uint256)": FunctionFragment;
     "hasVoted(uint256,address)": FunctionFragment;
     "hashProposal(address[],uint256[],bytes[],bytes32)": FunctionFragment;
     "name()": FunctionFragment;
@@ -86,23 +55,17 @@ export interface MyGovernorInterface extends utils.Interface {
     "proposalProposer(uint256)": FunctionFragment;
     "proposalSnapshot(uint256)": FunctionFragment;
     "proposalThreshold()": FunctionFragment;
-    "proposalVotes(uint256)": FunctionFragment;
     "propose(address[],uint256[],bytes[],string)": FunctionFragment;
     "quorum(uint256)": FunctionFragment;
     "quorumDenominator()": FunctionFragment;
     "quorumNumerator(uint256)": FunctionFragment;
     "quorumNumerator()": FunctionFragment;
     "relay(address,uint256,bytes)": FunctionFragment;
-    "setProposalThreshold(uint256)": FunctionFragment;
-    "setVotingDelay(uint256)": FunctionFragment;
-    "setVotingPeriod(uint256)": FunctionFragment;
     "state(uint256)": FunctionFragment;
-    "submitWork(bytes,string,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "token()": FunctionFragment;
     "updateQuorumNumerator(uint256)": FunctionFragment;
     "version()": FunctionFragment;
-    "vote(uint256,address,uint256)": FunctionFragment;
     "votingDelay()": FunctionFragment;
     "votingPeriod()": FunctionFragment;
   };
@@ -119,17 +82,11 @@ export interface MyGovernorInterface extends utils.Interface {
       | "castVoteWithReason"
       | "castVoteWithReasonAndParams"
       | "castVoteWithReasonAndParamsBySig"
-      | "claimRewards"
       | "clock"
-      | "createCampaign"
       | "eip712Domain"
       | "execute"
-      | "getAllCampaigns"
-      | "getCampaignEndTime"
-      | "getCampaignStartTime"
       | "getVotes"
       | "getVotesWithParams"
-      | "getWinner"
       | "hasVoted"
       | "hashProposal"
       | "name"
@@ -140,23 +97,17 @@ export interface MyGovernorInterface extends utils.Interface {
       | "proposalProposer"
       | "proposalSnapshot"
       | "proposalThreshold"
-      | "proposalVotes"
       | "propose"
       | "quorum"
       | "quorumDenominator"
       | "quorumNumerator(uint256)"
       | "quorumNumerator()"
       | "relay"
-      | "setProposalThreshold"
-      | "setVotingDelay"
-      | "setVotingPeriod"
       | "state"
-      | "submitWork"
       | "supportsInterface"
       | "token"
       | "updateQuorumNumerator"
       | "version"
-      | "vote"
       | "votingDelay"
       | "votingPeriod"
   ): FunctionFragment;
@@ -229,24 +180,7 @@ export interface MyGovernorInterface extends utils.Interface {
       PromiseOrValue<BytesLike>
     ]
   ): string;
-  encodeFunctionData(
-    functionFragment: "claimRewards",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
-  ): string;
   encodeFunctionData(functionFragment: "clock", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "createCampaign",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
-  ): string;
   encodeFunctionData(
     functionFragment: "eip712Domain",
     values?: undefined
@@ -261,18 +195,6 @@ export interface MyGovernorInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "getAllCampaigns",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getCampaignEndTime",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getCampaignStartTime",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getVotes",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
@@ -283,10 +205,6 @@ export interface MyGovernorInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BytesLike>
     ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getWinner",
-    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "hasVoted",
@@ -348,10 +266,6 @@ export interface MyGovernorInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "proposalVotes",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "propose",
     values: [
       PromiseOrValue<string>[],
@@ -385,28 +299,8 @@ export interface MyGovernorInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "setProposalThreshold",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setVotingDelay",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setVotingPeriod",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "state",
     values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "submitWork",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
-    ]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -418,14 +312,6 @@ export interface MyGovernorInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(functionFragment: "version", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "vote",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
-  ): string;
   encodeFunctionData(
     functionFragment: "votingDelay",
     values?: undefined
@@ -466,38 +352,17 @@ export interface MyGovernorInterface extends utils.Interface {
     functionFragment: "castVoteWithReasonAndParamsBySig",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "claimRewards",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "clock", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "createCampaign",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "eip712Domain",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getAllCampaigns",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getCampaignEndTime",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getCampaignStartTime",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "getVotes", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getVotesWithParams",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getWinner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasVoted", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "hashProposal",
@@ -532,10 +397,6 @@ export interface MyGovernorInterface extends utils.Interface {
     functionFragment: "proposalThreshold",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "proposalVotes",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "propose", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "quorum", data: BytesLike): Result;
   decodeFunctionResult(
@@ -551,20 +412,7 @@ export interface MyGovernorInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "relay", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "setProposalThreshold",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setVotingDelay",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setVotingPeriod",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "submitWork", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -575,7 +423,6 @@ export interface MyGovernorInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "version", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "votingDelay",
     data: BytesLike
@@ -588,40 +435,20 @@ export interface MyGovernorInterface extends utils.Interface {
   events: {
     "EIP712DomainChanged()": EventFragment;
     "ProposalCanceled(uint256)": EventFragment;
-    "ProposalCreated(uint256,address,string,uint256)": EventFragment;
     "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)": EventFragment;
     "ProposalExecuted(uint256)": EventFragment;
-    "ProposalThresholdSet(uint256,uint256)": EventFragment;
     "QuorumNumeratorUpdated(uint256,uint256)": EventFragment;
-    "RewardsDistributed(uint256,uint256,uint256,uint256)": EventFragment;
     "VoteCast(address,uint256,uint8,uint256,string)": EventFragment;
     "VoteCastWithParams(address,uint256,uint8,uint256,string,bytes)": EventFragment;
-    "VoteRecorded(uint256,address,uint256,uint256)": EventFragment;
-    "Voted(uint256,address)": EventFragment;
-    "VotingDelaySet(uint256,uint256)": EventFragment;
-    "VotingPeriodSet(uint256,uint256)": EventFragment;
-    "WorkSubmitted(bytes,uint256,address,string)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "EIP712DomainChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ProposalCanceled"): EventFragment;
-  getEvent(
-    nameOrSignatureOrTopic: "ProposalCreated(uint256,address,string,uint256)"
-  ): EventFragment;
-  getEvent(
-    nameOrSignatureOrTopic: "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)"
-  ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ProposalCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ProposalExecuted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ProposalThresholdSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "QuorumNumeratorUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RewardsDistributed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "VoteCast"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "VoteCastWithParams"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "VoteRecorded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Voted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "VotingDelaySet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "VotingPeriodSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WorkSubmitted"): EventFragment;
 }
 
 export interface EIP712DomainChangedEventObject {}
@@ -644,21 +471,7 @@ export type ProposalCanceledEvent = TypedEvent<
 export type ProposalCanceledEventFilter =
   TypedEventFilter<ProposalCanceledEvent>;
 
-export interface ProposalCreated_uint256_address_string_uint256_EventObject {
-  proposalId: BigNumber;
-  creator: string;
-  description: string;
-  rewardAmount: BigNumber;
-}
-export type ProposalCreated_uint256_address_string_uint256_Event = TypedEvent<
-  [BigNumber, string, string, BigNumber],
-  ProposalCreated_uint256_address_string_uint256_EventObject
->;
-
-export type ProposalCreated_uint256_address_string_uint256_EventFilter =
-  TypedEventFilter<ProposalCreated_uint256_address_string_uint256_Event>;
-
-export interface ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventObject {
+export interface ProposalCreatedEventObject {
   proposalId: BigNumber;
   proposer: string;
   targets: string[];
@@ -669,24 +482,22 @@ export interface ProposalCreated_uint256_address_address_array_uint256_array_str
   voteEnd: BigNumber;
   description: string;
 }
-export type ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_Event =
-  TypedEvent<
-    [
-      BigNumber,
-      string,
-      string[],
-      BigNumber[],
-      string[],
-      string[],
-      BigNumber,
-      BigNumber,
-      string
-    ],
-    ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventObject
-  >;
+export type ProposalCreatedEvent = TypedEvent<
+  [
+    BigNumber,
+    string,
+    string[],
+    BigNumber[],
+    string[],
+    string[],
+    BigNumber,
+    BigNumber,
+    string
+  ],
+  ProposalCreatedEventObject
+>;
 
-export type ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventFilter =
-  TypedEventFilter<ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_Event>;
+export type ProposalCreatedEventFilter = TypedEventFilter<ProposalCreatedEvent>;
 
 export interface ProposalExecutedEventObject {
   proposalId: BigNumber;
@@ -699,18 +510,6 @@ export type ProposalExecutedEvent = TypedEvent<
 export type ProposalExecutedEventFilter =
   TypedEventFilter<ProposalExecutedEvent>;
 
-export interface ProposalThresholdSetEventObject {
-  oldProposalThreshold: BigNumber;
-  newProposalThreshold: BigNumber;
-}
-export type ProposalThresholdSetEvent = TypedEvent<
-  [BigNumber, BigNumber],
-  ProposalThresholdSetEventObject
->;
-
-export type ProposalThresholdSetEventFilter =
-  TypedEventFilter<ProposalThresholdSetEvent>;
-
 export interface QuorumNumeratorUpdatedEventObject {
   oldQuorumNumerator: BigNumber;
   newQuorumNumerator: BigNumber;
@@ -722,20 +521,6 @@ export type QuorumNumeratorUpdatedEvent = TypedEvent<
 
 export type QuorumNumeratorUpdatedEventFilter =
   TypedEventFilter<QuorumNumeratorUpdatedEvent>;
-
-export interface RewardsDistributedEventObject {
-  proposalId: BigNumber;
-  totalRewards: BigNumber;
-  winnerReward: BigNumber;
-  voterRewards: BigNumber;
-}
-export type RewardsDistributedEvent = TypedEvent<
-  [BigNumber, BigNumber, BigNumber, BigNumber],
-  RewardsDistributedEventObject
->;
-
-export type RewardsDistributedEventFilter =
-  TypedEventFilter<RewardsDistributedEvent>;
 
 export interface VoteCastEventObject {
   voter: string;
@@ -767,68 +552,12 @@ export type VoteCastWithParamsEvent = TypedEvent<
 export type VoteCastWithParamsEventFilter =
   TypedEventFilter<VoteCastWithParamsEvent>;
 
-export interface VoteRecordedEventObject {
-  proposalId: BigNumber;
-  voter: string;
-  campaignId: BigNumber;
-  votes: BigNumber;
-}
-export type VoteRecordedEvent = TypedEvent<
-  [BigNumber, string, BigNumber, BigNumber],
-  VoteRecordedEventObject
->;
-
-export type VoteRecordedEventFilter = TypedEventFilter<VoteRecordedEvent>;
-
-export interface VotedEventObject {
-  proposalId: BigNumber;
-  voter: string;
-}
-export type VotedEvent = TypedEvent<[BigNumber, string], VotedEventObject>;
-
-export type VotedEventFilter = TypedEventFilter<VotedEvent>;
-
-export interface VotingDelaySetEventObject {
-  oldVotingDelay: BigNumber;
-  newVotingDelay: BigNumber;
-}
-export type VotingDelaySetEvent = TypedEvent<
-  [BigNumber, BigNumber],
-  VotingDelaySetEventObject
->;
-
-export type VotingDelaySetEventFilter = TypedEventFilter<VotingDelaySetEvent>;
-
-export interface VotingPeriodSetEventObject {
-  oldVotingPeriod: BigNumber;
-  newVotingPeriod: BigNumber;
-}
-export type VotingPeriodSetEvent = TypedEvent<
-  [BigNumber, BigNumber],
-  VotingPeriodSetEventObject
->;
-
-export type VotingPeriodSetEventFilter = TypedEventFilter<VotingPeriodSetEvent>;
-
-export interface WorkSubmittedEventObject {
-  cid: string;
-  proposalCounter: BigNumber;
-  owner: string;
-  workDescription: string;
-}
-export type WorkSubmittedEvent = TypedEvent<
-  [string, BigNumber, string, string],
-  WorkSubmittedEventObject
->;
-
-export type WorkSubmittedEventFilter = TypedEventFilter<WorkSubmittedEvent>;
-
-export interface MyGovernor extends BaseContract {
+export interface GovernorVotesQuorumFraction extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: MyGovernorInterface;
+  interface: GovernorVotesQuorumFractionInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -907,22 +636,7 @@ export interface MyGovernor extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    claimRewards(
-      campaignId: PromiseOrValue<BigNumberish>,
-      claimer: PromiseOrValue<string>,
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     clock(overrides?: CallOverrides): Promise<[number]>;
-
-    createCampaign(
-      description: PromiseOrValue<string>,
-      rewardAmount: PromiseOrValue<BigNumberish>,
-      startBlock: PromiseOrValue<BigNumberish>,
-      endBlock: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     eip712Domain(
       overrides?: CallOverrides
@@ -946,20 +660,6 @@ export interface MyGovernor extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    getAllCampaigns(
-      overrides?: CallOverrides
-    ): Promise<[CampaignStructOutput[]]>;
-
-    getCampaignEndTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    getCampaignStartTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     getVotes(
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
@@ -970,11 +670,6 @@ export interface MyGovernor extends BaseContract {
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
       params: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    getWinner(
-      campaignId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -1037,17 +732,6 @@ export interface MyGovernor extends BaseContract {
 
     proposalThreshold(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    proposalVotes(
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber] & {
-        againstVotes: BigNumber;
-        forVotes: BigNumber;
-        abstainVotes: BigNumber;
-      }
-    >;
-
     propose(
       targets: PromiseOrValue<string>[],
       values: PromiseOrValue<BigNumberish>[],
@@ -1077,32 +761,10 @@ export interface MyGovernor extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setProposalThreshold(
-      newProposalThreshold: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setVotingDelay(
-      newVotingDelay: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setVotingPeriod(
-      newVotingPeriod: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     state(
       proposalId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[number]>;
-
-    submitWork(
-      cid: PromiseOrValue<BytesLike>,
-      workDescription: PromiseOrValue<string>,
-      owner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
@@ -1117,13 +779,6 @@ export interface MyGovernor extends BaseContract {
     ): Promise<ContractTransaction>;
 
     version(overrides?: CallOverrides): Promise<[string]>;
-
-    vote(
-      proposalId: PromiseOrValue<BigNumberish>,
-      voter: PromiseOrValue<string>,
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     votingDelay(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -1187,22 +842,7 @@ export interface MyGovernor extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  claimRewards(
-    campaignId: PromiseOrValue<BigNumberish>,
-    claimer: PromiseOrValue<string>,
-    proposalId: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   clock(overrides?: CallOverrides): Promise<number>;
-
-  createCampaign(
-    description: PromiseOrValue<string>,
-    rewardAmount: PromiseOrValue<BigNumberish>,
-    startBlock: PromiseOrValue<BigNumberish>,
-    endBlock: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   eip712Domain(
     overrides?: CallOverrides
@@ -1226,18 +866,6 @@ export interface MyGovernor extends BaseContract {
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  getAllCampaigns(overrides?: CallOverrides): Promise<CampaignStructOutput[]>;
-
-  getCampaignEndTime(
-    campaignId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  getCampaignStartTime(
-    campaignId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   getVotes(
     account: PromiseOrValue<string>,
     timepoint: PromiseOrValue<BigNumberish>,
@@ -1248,11 +876,6 @@ export interface MyGovernor extends BaseContract {
     account: PromiseOrValue<string>,
     timepoint: PromiseOrValue<BigNumberish>,
     params: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  getWinner(
-    campaignId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -1315,17 +938,6 @@ export interface MyGovernor extends BaseContract {
 
   proposalThreshold(overrides?: CallOverrides): Promise<BigNumber>;
 
-  proposalVotes(
-    proposalId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber, BigNumber] & {
-      againstVotes: BigNumber;
-      forVotes: BigNumber;
-      abstainVotes: BigNumber;
-    }
-  >;
-
   propose(
     targets: PromiseOrValue<string>[],
     values: PromiseOrValue<BigNumberish>[],
@@ -1355,32 +967,10 @@ export interface MyGovernor extends BaseContract {
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setProposalThreshold(
-    newProposalThreshold: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setVotingDelay(
-    newVotingDelay: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setVotingPeriod(
-    newVotingPeriod: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   state(
     proposalId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<number>;
-
-  submitWork(
-    cid: PromiseOrValue<BytesLike>,
-    workDescription: PromiseOrValue<string>,
-    owner: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   supportsInterface(
     interfaceId: PromiseOrValue<BytesLike>,
@@ -1395,13 +985,6 @@ export interface MyGovernor extends BaseContract {
   ): Promise<ContractTransaction>;
 
   version(overrides?: CallOverrides): Promise<string>;
-
-  vote(
-    proposalId: PromiseOrValue<BigNumberish>,
-    voter: PromiseOrValue<string>,
-    campaignId: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   votingDelay(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1465,22 +1048,7 @@ export interface MyGovernor extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    claimRewards(
-      campaignId: PromiseOrValue<BigNumberish>,
-      claimer: PromiseOrValue<string>,
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     clock(overrides?: CallOverrides): Promise<number>;
-
-    createCampaign(
-      description: PromiseOrValue<string>,
-      rewardAmount: PromiseOrValue<BigNumberish>,
-      startBlock: PromiseOrValue<BigNumberish>,
-      endBlock: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     eip712Domain(
       overrides?: CallOverrides
@@ -1504,18 +1072,6 @@ export interface MyGovernor extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getAllCampaigns(overrides?: CallOverrides): Promise<CampaignStructOutput[]>;
-
-    getCampaignEndTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getCampaignStartTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getVotes(
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
@@ -1526,11 +1082,6 @@ export interface MyGovernor extends BaseContract {
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
       params: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getWinner(
-      campaignId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1593,17 +1144,6 @@ export interface MyGovernor extends BaseContract {
 
     proposalThreshold(overrides?: CallOverrides): Promise<BigNumber>;
 
-    proposalVotes(
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber] & {
-        againstVotes: BigNumber;
-        forVotes: BigNumber;
-        abstainVotes: BigNumber;
-      }
-    >;
-
     propose(
       targets: PromiseOrValue<string>[],
       values: PromiseOrValue<BigNumberish>[],
@@ -1633,32 +1173,10 @@ export interface MyGovernor extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setProposalThreshold(
-      newProposalThreshold: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setVotingDelay(
-      newVotingDelay: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setVotingPeriod(
-      newVotingPeriod: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     state(
       proposalId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<number>;
-
-    submitWork(
-      cid: PromiseOrValue<BytesLike>,
-      workDescription: PromiseOrValue<string>,
-      owner: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
@@ -1674,13 +1192,6 @@ export interface MyGovernor extends BaseContract {
 
     version(overrides?: CallOverrides): Promise<string>;
 
-    vote(
-      proposalId: PromiseOrValue<BigNumberish>,
-      voter: PromiseOrValue<string>,
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     votingDelay(overrides?: CallOverrides): Promise<BigNumber>;
 
     votingPeriod(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1693,12 +1204,6 @@ export interface MyGovernor extends BaseContract {
     "ProposalCanceled(uint256)"(proposalId?: null): ProposalCanceledEventFilter;
     ProposalCanceled(proposalId?: null): ProposalCanceledEventFilter;
 
-    "ProposalCreated(uint256,address,string,uint256)"(
-      proposalId?: null,
-      creator?: null,
-      description?: null,
-      rewardAmount?: null
-    ): ProposalCreated_uint256_address_string_uint256_EventFilter;
     "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)"(
       proposalId?: null,
       proposer?: null,
@@ -1709,19 +1214,21 @@ export interface MyGovernor extends BaseContract {
       voteStart?: null,
       voteEnd?: null,
       description?: null
-    ): ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventFilter;
+    ): ProposalCreatedEventFilter;
+    ProposalCreated(
+      proposalId?: null,
+      proposer?: null,
+      targets?: null,
+      values?: null,
+      signatures?: null,
+      calldatas?: null,
+      voteStart?: null,
+      voteEnd?: null,
+      description?: null
+    ): ProposalCreatedEventFilter;
 
     "ProposalExecuted(uint256)"(proposalId?: null): ProposalExecutedEventFilter;
     ProposalExecuted(proposalId?: null): ProposalExecutedEventFilter;
-
-    "ProposalThresholdSet(uint256,uint256)"(
-      oldProposalThreshold?: null,
-      newProposalThreshold?: null
-    ): ProposalThresholdSetEventFilter;
-    ProposalThresholdSet(
-      oldProposalThreshold?: null,
-      newProposalThreshold?: null
-    ): ProposalThresholdSetEventFilter;
 
     "QuorumNumeratorUpdated(uint256,uint256)"(
       oldQuorumNumerator?: null,
@@ -1731,19 +1238,6 @@ export interface MyGovernor extends BaseContract {
       oldQuorumNumerator?: null,
       newQuorumNumerator?: null
     ): QuorumNumeratorUpdatedEventFilter;
-
-    "RewardsDistributed(uint256,uint256,uint256,uint256)"(
-      proposalId?: null,
-      totalRewards?: null,
-      winnerReward?: null,
-      voterRewards?: null
-    ): RewardsDistributedEventFilter;
-    RewardsDistributed(
-      proposalId?: null,
-      totalRewards?: null,
-      winnerReward?: null,
-      voterRewards?: null
-    ): RewardsDistributedEventFilter;
 
     "VoteCast(address,uint256,uint8,uint256,string)"(
       voter?: PromiseOrValue<string> | null,
@@ -1776,53 +1270,6 @@ export interface MyGovernor extends BaseContract {
       reason?: null,
       params?: null
     ): VoteCastWithParamsEventFilter;
-
-    "VoteRecorded(uint256,address,uint256,uint256)"(
-      proposalId?: PromiseOrValue<BigNumberish> | null,
-      voter?: PromiseOrValue<string> | null,
-      campaignId?: PromiseOrValue<BigNumberish> | null,
-      votes?: null
-    ): VoteRecordedEventFilter;
-    VoteRecorded(
-      proposalId?: PromiseOrValue<BigNumberish> | null,
-      voter?: PromiseOrValue<string> | null,
-      campaignId?: PromiseOrValue<BigNumberish> | null,
-      votes?: null
-    ): VoteRecordedEventFilter;
-
-    "Voted(uint256,address)"(proposalId?: null, voter?: null): VotedEventFilter;
-    Voted(proposalId?: null, voter?: null): VotedEventFilter;
-
-    "VotingDelaySet(uint256,uint256)"(
-      oldVotingDelay?: null,
-      newVotingDelay?: null
-    ): VotingDelaySetEventFilter;
-    VotingDelaySet(
-      oldVotingDelay?: null,
-      newVotingDelay?: null
-    ): VotingDelaySetEventFilter;
-
-    "VotingPeriodSet(uint256,uint256)"(
-      oldVotingPeriod?: null,
-      newVotingPeriod?: null
-    ): VotingPeriodSetEventFilter;
-    VotingPeriodSet(
-      oldVotingPeriod?: null,
-      newVotingPeriod?: null
-    ): VotingPeriodSetEventFilter;
-
-    "WorkSubmitted(bytes,uint256,address,string)"(
-      cid?: null,
-      proposalCounter?: null,
-      owner?: null,
-      workDescription?: null
-    ): WorkSubmittedEventFilter;
-    WorkSubmitted(
-      cid?: null,
-      proposalCounter?: null,
-      owner?: null,
-      workDescription?: null
-    ): WorkSubmittedEventFilter;
   };
 
   estimateGas: {
@@ -1883,22 +1330,7 @@ export interface MyGovernor extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    claimRewards(
-      campaignId: PromiseOrValue<BigNumberish>,
-      claimer: PromiseOrValue<string>,
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     clock(overrides?: CallOverrides): Promise<BigNumber>;
-
-    createCampaign(
-      description: PromiseOrValue<string>,
-      rewardAmount: PromiseOrValue<BigNumberish>,
-      startBlock: PromiseOrValue<BigNumberish>,
-      endBlock: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
 
     eip712Domain(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1908,18 +1340,6 @@ export interface MyGovernor extends BaseContract {
       calldatas: PromiseOrValue<BytesLike>[],
       descriptionHash: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    getAllCampaigns(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getCampaignEndTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getCampaignStartTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getVotes(
@@ -1932,11 +1352,6 @@ export interface MyGovernor extends BaseContract {
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
       params: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getWinner(
-      campaignId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1999,11 +1414,6 @@ export interface MyGovernor extends BaseContract {
 
     proposalThreshold(overrides?: CallOverrides): Promise<BigNumber>;
 
-    proposalVotes(
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     propose(
       targets: PromiseOrValue<string>[],
       values: PromiseOrValue<BigNumberish>[],
@@ -2033,31 +1443,9 @@ export interface MyGovernor extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setProposalThreshold(
-      newProposalThreshold: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setVotingDelay(
-      newVotingDelay: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setVotingPeriod(
-      newVotingPeriod: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     state(
       proposalId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    submitWork(
-      cid: PromiseOrValue<BytesLike>,
-      workDescription: PromiseOrValue<string>,
-      owner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     supportsInterface(
@@ -2073,13 +1461,6 @@ export interface MyGovernor extends BaseContract {
     ): Promise<BigNumber>;
 
     version(overrides?: CallOverrides): Promise<BigNumber>;
-
-    vote(
-      proposalId: PromiseOrValue<BigNumberish>,
-      voter: PromiseOrValue<string>,
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
 
     votingDelay(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2146,22 +1527,7 @@ export interface MyGovernor extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    claimRewards(
-      campaignId: PromiseOrValue<BigNumberish>,
-      claimer: PromiseOrValue<string>,
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     clock(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    createCampaign(
-      description: PromiseOrValue<string>,
-      rewardAmount: PromiseOrValue<BigNumberish>,
-      startBlock: PromiseOrValue<BigNumberish>,
-      endBlock: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     eip712Domain(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -2171,18 +1537,6 @@ export interface MyGovernor extends BaseContract {
       calldatas: PromiseOrValue<BytesLike>[],
       descriptionHash: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getAllCampaigns(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getCampaignEndTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getCampaignStartTime(
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getVotes(
@@ -2195,11 +1549,6 @@ export interface MyGovernor extends BaseContract {
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
       params: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getWinner(
-      campaignId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2262,11 +1611,6 @@ export interface MyGovernor extends BaseContract {
 
     proposalThreshold(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    proposalVotes(
-      proposalId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     propose(
       targets: PromiseOrValue<string>[],
       values: PromiseOrValue<BigNumberish>[],
@@ -2298,31 +1642,9 @@ export interface MyGovernor extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setProposalThreshold(
-      newProposalThreshold: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setVotingDelay(
-      newVotingDelay: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setVotingPeriod(
-      newVotingPeriod: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     state(
       proposalId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    submitWork(
-      cid: PromiseOrValue<BytesLike>,
-      workDescription: PromiseOrValue<string>,
-      owner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     supportsInterface(
@@ -2338,13 +1660,6 @@ export interface MyGovernor extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     version(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    vote(
-      proposalId: PromiseOrValue<BigNumberish>,
-      voter: PromiseOrValue<string>,
-      campaignId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     votingDelay(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

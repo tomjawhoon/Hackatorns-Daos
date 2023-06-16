@@ -69,6 +69,14 @@ contract MyGovernor is
         );
     }
 
+    function getAllCampaigns() public view returns (Campaign[] memory) {
+        Campaign[] memory allCampaigns = new Campaign[](campaignsCounter);
+        for (uint256 i = 1; i <= campaignsCounter; i++) {
+            allCampaigns[i - 1] = campaigns[i];
+        }
+        return allCampaigns;
+    }
+
     // !! Campagine start and end blocks are not used in this example
     // !! Proposal have CID ?
     function submitWork(
@@ -231,12 +239,10 @@ contract MyGovernor is
 
         require(!isVoter(proposalId, voter), "Already voted");
 
-
         proposals[proposalId].yesVotes += votes;
 
         proposals[proposalId].voters.push(voter);
         proposals[proposalId].votes.push(votes);
-
 
         // !! Check Votes
         emit VoteRecorded(proposalId, voter, campaignId, votes);

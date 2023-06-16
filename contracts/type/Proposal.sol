@@ -21,3 +21,5 @@ struct Campaign {
     uint256 endBlock;
     uint256 rewardAmount;
 }
+
+
