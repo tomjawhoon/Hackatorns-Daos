@@ -6,10 +6,10 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log('Deploying contracts with the account:', deployer.address);
   console.log('Deploying ERC20Token...');
-  const ERC20Token = await hre.ethers.getContractFactory('ERC20');
-  const rewardToken = await ERC20Token.deploy(deployer,1000000 * 10 ** 18);
-  console.log('ERC20Token deployed to:', rewardToken.address);
-  console.log('Deployer:', deployer.address);
+  // const ERC20Token = await hre.ethers.getContractFactory('ERC20');
+  // const rewardToken = await ERC20Token.deploy(deployer,1000000 * 10 ** 18);
+  // console.log('ERC20Token deployed to:', rewardToken.address);
+  // console.log('Deployer:', deployer.address);
 
   // const deploymentData = {
   //   RewardToken: {

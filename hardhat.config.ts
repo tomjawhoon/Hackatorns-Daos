@@ -7,8 +7,6 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-// require("@nomiclabs/hardhat-waffle");
-// require("@nomicfoundation/hardhat-toolbox")
 
 dotenv.config();
 
