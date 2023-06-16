@@ -31,7 +31,6 @@ describe('MyGovernor', async () => {
   //   myGovernor = await MyGovernor.deploy('0x123', 'Hello World') as Contract
   //  await myGovernor.deployed()
 
-
     await myGovernor.createCampaign(
       description,
       rewardAmount,
@@ -108,6 +107,7 @@ describe('MyGovernor', async () => {
     expect(balance).to.equal(rewardAmount)
   })
 
+  // !! จำลองเครมมั่ว ๆ แบบไม่ได้โอน
   it('should not allow unauthorized claimer to claim rewards', async () => {
     // Create a campaign
     const description = 'New Campaign'
@@ -137,7 +137,6 @@ describe('MyGovernor', async () => {
     // const unauthorizedClaimer = ethers.utils.getAddress(owner1)
     const proposalId = 1
 
-    // !! จำลองเครมมั่ว ๆ แบบไม่ได้โอน
     await expect(
       myGovernor.claimRewards(campaignId, owner1.address, proposalId),
     ).to.be.revertedWith('Unauthorized claimer')

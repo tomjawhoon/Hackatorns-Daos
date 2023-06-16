@@ -16,6 +16,13 @@ contract Events {
         uint256 rewardAmount
     );
 
+    event VoteRecorded(
+        uint256 indexed proposalId,
+        address indexed voter,
+        uint256 indexed campaignId,
+        uint256 votes
+    );
+
     event Voted(uint256 proposalId, address voter);
 
     event RewardsDistributed(

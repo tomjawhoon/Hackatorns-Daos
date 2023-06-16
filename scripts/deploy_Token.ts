@@ -11,16 +11,16 @@ async function main() {
   console.log('ERC20Token deployed to:', rewardToken.address);
   console.log('Deployer:', deployer.address);
 
-  const deploymentData = {
-    RewardToken: {
-      address: rewardToken.address,
-    },
-  };
+  // const deploymentData = {
+  //   RewardToken: {
+  //     address: rewardToken.address,
+  //   },
+  // };
   
-  fs.writeFileSync(
-    './deployments.json',
-    JSON.stringify(deploymentData, null, 2)
-  );
+  // fs.writeFileSync(
+  //   './deployments.json',
+  //   JSON.stringify(deploymentData, null, 2)
+  // );
   
   console.log('Deployment artifacts saved to deployments.json');
 }
