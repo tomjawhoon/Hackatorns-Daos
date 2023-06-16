@@ -2,6 +2,7 @@ import { ethers } from 'hardhat'
 import { Contract, ContractFactory } from 'ethers'
 import { expect } from 'chai'
 
+
 describe('MyGovernor', async () => {
   let myGovernor: Contract
   let owner: any
@@ -12,11 +13,8 @@ describe('MyGovernor', async () => {
   let voter3: any
   let signers
 
-//   const MyGovernor: ContractFactory = await ethers.getContractFactory('MyGovernor')
-//   myGovernor = await MyGovernor.deploy('0x123', 'Hello World') as Contract
-//  await myGovernor.deployed()
-
   beforeEach(async () => {
+      // const rewardToken = "0x837abcA63D0A85275D08a648CBECE4168ab0ad37"
     const MyGovernor: ContractFactory = await ethers.getContractFactory('MyGovernor')
      myGovernor = await MyGovernor.deploy('0x123', 'Hello World') as Contract
     await myGovernor.deployed()

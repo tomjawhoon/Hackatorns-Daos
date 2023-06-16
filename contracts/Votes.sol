@@ -1,304 +1,306 @@
-// // SPDX-License-Identifier: MIT
-// pragma solidity ^0.8.9;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-// import "@openzeppelin/contracts/governance/Governor.sol";
-// import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
-// import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
-// import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
-// import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
-// import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
-// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/governance/Governor.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./type/Proposal.sol"; // Import the Proposal struct from the separate file;
+import "./event/Events.sol"; // Import the Events contract;
 
-// contract MyGovernor is
-//     Governor,
-//     GovernorSettings,
-//     GovernorCountingSimple,
-//     GovernorVotes,
-//     GovernorVotesQuorumFraction,
-//     GovernorTimelockControl
-// {
-//     // Events
-//     event WorkSubmitted(
-//         bytes cid,
-//         uint256 proposalId,
-//         address owner,
-//         string workDescription,
-//         string nameOwner
-//     );
+contract MyGovernor is
+    Governor,
+    GovernorSettings,
+    GovernorCountingSimple,
+    GovernorVotes,
+    GovernorVotesQuorumFraction,
+    GovernorTimelockControl,
+    Events // Inherit from the Events contract
+{
+    mapping(uint256 => Proposal) private proposals;
 
-//     event ProposalCreated(
-//         uint256 proposalId,
-//         address creator,
-//         string description,
-//         uint256 rewardAmount
-//     );
-//     event Voted(uint256 proposalId, address voter);
-//     event RewardsDistributed(
-//         uint256 proposalId,
-//         uint256 totalRewards,
-//         uint256 winnerReward,
-//         uint256 voterRewards
-//     );
+    mapping(uint256 => Campaign) private campaigns;
+    // uint256 proposalId ;
+    uint256 campaignsCounter;
+    uint256 proposalCounter;
+    address private owner;
+    ERC20 private _rewardToken; // Declare the ERC20 token contract variable
 
-//     mapping(uint256 => Proposal) private proposals;
-//     uint256 private proposalCounter;
-//     address private owner;
-//     ERC20 private _rewardToken; // Declare the ERC20 token contract variable
+    constructor(
+        address rewardToken, // Pass the ERC20 token contract address during deployment
+        TimelockController _timelock
+    )
+        Governor("MyGovernor")
+        GovernorSettings(7200 /* 1 day */, 7200 /* 1 day */, 0)
+        GovernorVotes(IVotes(rewardToken)) // Pass the reward token address to the GovernorVotes constructor
+        GovernorVotesQuorumFraction(4)
+        GovernorTimelockControl(_timelock)
+    {
+        owner = msg.sender; // Set the contract deployer as the owner
+        _rewardToken = ERC20(rewardToken); // Initialize the ERC20 token contract
+    }
 
-//     struct Proposal {
-//         address creator;
-//         string description;
-//         uint256 yesVotes;
-//         uint256 noVotes;
-//         bool executed;
-//         bool canceled;
-//         address[] voters;
-//         uint256[] votes;
-//         uint256 rewardAmount;
-//         address winningEntry;
-//         uint256 startBlock;
-//         uint256 endBlock;
-//     }
+    // Create a new project proposal
+    // !! Campagine start and end blocks are not used in this example
+    // !! Campagine ID is not used in this example
+    function createCampaign(
+        string memory description, // !! Discription of the proposal
+        uint256 rewardAmount, // !! Ex 1000 APE COIN
+        uint256 startBlock, // !! Time to start the proposal
+        uint256 endBlock // !! End to end the proposal
+    ) external {
+        campaignsCounter++;
+        campaigns[campaignsCounter] = Campaign(
+            msg.sender, // !! Set the proposal creator as the sender
+            campaignsCounter, // Initialize the campaign array
+            new uint256[](0), // !! Set the campaign ID
+            startBlock, // !! Set the start block
+            endBlock, //  !! Set the end block
+            rewardAmount // !! Set the reward amount
+        );
+        emit ProposalCreated(
+            proposalCounter,
+            msg.sender,
+            description,
+            rewardAmount
+        );
+    }
 
-//     constructor(
-//         address rewardToken, // Pass the ERC20 token contract address during deployment
-//         TimelockController _timelock
-//     )
-//         Governor("MyGovernor")
-//         GovernorSettings(7200 /* 1 day */, 7200 /* 1 day */, 0)
-//         GovernorVotes(IVotes(rewardToken)) // Pass the reward token address to the GovernorVotes constructor
-//         GovernorVotesQuorumFraction(4)
-//         GovernorTimelockControl(_timelock)
-//     {
-//         owner = msg.sender; // Set the contract deployer as the owner
-//         _rewardToken = ERC20(rewardToken); // Initialize the ERC20 token contract
-//     }
+    // !! Campagine start and end blocks are not used in this example
+    // !! Proposal have CID ?
+    function submitWork(
+        bytes memory cid,
+        // uint256 proposalId,
+        string memory workDescription,
+        address owner
+    ) external {
+        proposalCounter++;
+        proposals[proposalCounter] = Proposal(
+            proposalCounter,
+            msg.sender, // !! Set the proposal creator as the sender
+            workDescription, // !! Set the proposal description
+            0, // Set the yes votes to 0
+            0, //   Set the no votes to 0
+            false, // Set the executed flag to false
+            false, // Set the canceled flag to false
+            new address[](0), // Initialize the voters array
+            new uint256[](0) // Initialize the votes array
+        );
 
-//     // Create a new project proposal
-//     // !! Campagine start and end blocks are not used in this example
-//     function createCampaign(
-//         string memory description,
-//         uint256 rewardAmount, // 1000 APE COIN
-//         uint256 startBlock,
-//         uint256 endBlock
-//     ) external {
-//         proposalCounter++;
-//         proposals[proposalCounter] = Proposal(
-//             msg.sender,
-//             description,
-//             0,
-//             0,
-//             false,
-//             false,
-//             new address[](0),
-//             new uint256[](0),
-//             rewardAmount,
-//             address(0),
-//             startBlock,
-//             endBlock
-//         );
-//         emit ProposalCreated(
-//             proposalCounter,
-//             msg.sender,
-//             description,
-//             rewardAmount
-//         );
-//     }
+        Proposal storage proposal = proposals[proposalCounter];
+        require(!proposal.canceled, "Proposal was canceled");
+        require(!proposal.executed, "Proposal was already executed");
+        // proposal.winningEntry = owner;
+        proposal.executed = true;
+        emit WorkSubmitted(cid, proposalCounter, owner, workDescription);
 
-//     // Submit an entry for a project proposal
-//     // !! Campagine start and end blocks are not used in this example
-//     // !! Proposal have CID ?
+        // distributeRewards(proposalId);
+    }
 
-//     function submitWork(
-//         bytes memory cid,
-//         uint256 proposalId,
-//         string memory workDescription,
-//         string memory nameOwner
-//     ) external {
-//         require(
-//             block.number >= proposals[proposalId].startBlock,
-//             "Campaign has not started yet"
-//         );
-//         require(
-//             block.number <= proposals[proposalId].endBlock,
-//             "Campaign has ended"
-//         );
+    // !! Campagine start and end blocks are not used in this example
+    function claimRewards(
+        uint256 campaignId,
+        address claimer,
+        uint256 proposalId
+    ) external {
+        Campaign storage campaigns = campaigns[campaignId];
+        uint256 winnerId = getWinner(campaignId);
+        Proposal storage proposal = proposals[winnerId];
+        require(proposal.creator == claimer, "Unauthorized claimer");
 
-//         proposals[proposalId].winningEntry = msg.sender;
+        uint256 rewardAmount = calculateRewardAmount(
+            proposalId,
+            campaignId,
+            claimer
+        );
+        require(rewardAmount > 0, "No rewards to claim");
 
-//         emit WorkSubmitted(
-//             cid,
-//             proposalId,
-//             msg.sender,
-//             workDescription,
-//             nameOwner
-//         );
-//     }
+        _rewardToken.transfer(claimer, rewardAmount);
+    }
 
-//     function vote(uint256 proposalId) external {
-//         require(
-//             state(proposalId) == ProposalState.Active,
-//             "Proposal is not active"
-//         );
-//         require(
-//             block.number >= proposals[proposalId].startBlock,
-//             "Campaign has not started yet"
-//         );
-//         require(
-//             block.number <= proposals[proposalId].endBlock,
-//             "Campaign has ended"
-//         );
+    function calculateRewardAmount(
+        uint256 proposalId,
+        uint256 campaignId,
+        address claimer
+    ) internal view returns (uint256) {
+        Campaign storage campaign = campaigns[campaignId];
+        uint256 winnerId = getWinner(campaignId);
+        Proposal storage proposal = proposals[winnerId];
 
-//         uint256 votes = getVotes(msg.sender, block.number);
-//         require(votes > 0, "You do not have any voting power");
+        uint256 totalRewards = campaign.rewardAmount;
+        uint256 winnerReward = (totalRewards * 70) / 100;
 
-//         proposals[proposalId].yesVotes += votes;
+        uint256 voterRewards = (totalRewards * 30) / 100;
+        uint256 rewardAmount = 0;
+        if (proposal.creator == claimer) {
+            rewardAmount = winnerReward;
+        } else if (isVoter(proposalId, claimer)) {
+            uint256 votes = getVotes(claimer, block.number);
+            rewardAmount = (voterRewards * votes) / proposal.yesVotes;
+        }
 
-//         proposals[proposalId].voters.push(msg.sender);
-//         proposals[proposalId].votes.push(votes);
+        return rewardAmount;
+    }
 
-//         emit Voted(proposalId, msg.sender);
-//     }
+    // !! Version Nong Mah
 
-//     function getCampaignStartTime(
-//         uint256 proposalId
-//     ) public view returns (uint256) {
-//         require(proposalId <= proposalCounter, "Invalid proposalId");
+    // function getWinner(uint256 campaignId) public view returns (uint256) {
+    //     Campaign storage campaign = campaigns[campaignId];
+    //     uint256 bestScore = 0;
+    //     uint256 winnerId;
+    //     // Proposal storage proposal = proposals[campaign.proposalId];
+    //     for (uint256 i = 0; i < campaign.proposalId.length; i++) {
+    //         Proposal storage proposal = proposals[i];
+    //         winnerId = proposal.proposalId;
+    //         if (proposal.voters.length > bestScore) {
+    //             bestScore = proposal.voters.length;
+    //             winnerId = proposal.proposalId;
+    //         }
+    //     }
+    //     return winnerId;
+    // }
 
-//         return proposals[proposalId].startBlock;
-//     }
+    function getWinner(uint256 campaignId) public view returns (uint256) {
+        Campaign storage campaign = campaigns[campaignId];
+        uint256 bestScore = 0;
+        uint256 winnerId;
 
-//     function getCampaignEndTime(
-//         uint256 proposalId
-//     ) public view returns (uint256) {
-//         require(proposalId <= proposalCounter, "Invalid proposalId");
+        for (uint256 i = 0; i < campaign.proposalId.length; i++) {
+            Proposal storage proposal = proposals[campaign.proposalId[i]];
+            if (proposal.voters.length > bestScore) {
+                bestScore = proposal.voters.length;
+                winnerId = proposal.proposalId;
+            }
+        }
 
-//         return proposals[proposalId].endBlock;
-//     }
+        return bestScore;
+    }
 
-//     function proposalThreshold()
-//         public
-//         pure
-//         override(Governor, GovernorSettings)
-//         returns (uint256)
-//     {
-//         return 1; // Only one proposal is required to start voting
-//     }
+    function getCampaignStartTime(
+        uint256 campaignId
+    ) public view returns (uint256) {
+        require(campaignId <= campaignsCounter, "Invalid proposalId");
 
-//     function _execute(
-//         uint256 proposalId,
-//         address[] memory targets,
-//         uint256[] memory values,
-//         bytes[] memory calldatas,
-//         bytes32 descriptionHash
-//     ) internal override(Governor, GovernorTimelockControl) {
-//         require(
-//             proposals[proposalId].creator == owner,
-//             "Unauthorized executor"
-//         );
-//         require(
-//             proposals[proposalId].winningEntry != address(0),
-//             "Winning entry not selected"
-//         );
+        return campaigns[campaignId].startBlock;
+    }
 
-//         // Execute the proposal logic here
+    function getCampaignEndTime(
+        uint256 campaignId
+    ) public view returns (uint256) {
+        require(campaignId <= campaignsCounter, "Invalid proposalId");
 
-//         // Loop through the targets and make the corresponding function calls
-//         for (uint256 i = 0; i < targets.length; i++) {
-//             (bool success, ) = targets[i].call{value: values[i]}(calldatas[i]);
-//             require(success, "Execution of target call failed");
-//         }
+        return campaigns[campaignId].endBlock;
+    }
 
-//         // Set the proposal as executed
-//         proposals[proposalId].executed = true;
+    function isVoter(
+        uint256 proposalId, //!! proposalCounter
+        address voter
+    ) internal view returns (bool) {
+        Proposal storage proposal = proposals[proposalId];
+        for (uint256 i = 0; i < proposal.voters.length; i++) {
+            if (proposal.voters[i] == voter) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-//         // Distribute rewards after executing the proposal
-//         distributeRewards(proposalId);
-//     }
+    // !! เวลาให้กดโหวดส่งเข้ามาตัวนี้นะ
+    function vote(
+        uint256 proposalId,
+        address voter,
+        uint256 campaignId
+    ) external {
+        Campaign storage campaign = campaigns[campaignId];
+        require(
+            block.number >= campaigns[campaignId].startBlock,
+            "Campaign has not started yet"
+        );
+        require(
+            block.number <= campaigns[campaignId].endBlock,
+            "Campaign has ended"
+        );
 
-//     function _cancel(
-//         address[] memory targets,
-//         uint256[] memory values,
-//         bytes[] memory calldatas,
-//         bytes32 descriptionHash
-//     ) internal override(Governor, GovernorTimelockControl) returns (uint256) {
-//         require(
-//             proposals[proposalCounter].creator == owner,
-//             "Unauthorized canceller"
-//         );
+        uint256 votes = getVotes(voter, block.number);
+        require(votes > 0, "You do not have any voting power");
 
-//         // Additional cancellation logic here
+        require(!isVoter(proposalId, voter), "Already voted");
 
-//         proposals[proposalCounter].canceled = true;
+        proposals[proposalId].yesVotes += votes;
 
-//         return proposalCounter;
-//     }
+        proposals[proposalId].voters.push(voter);
+        proposals[proposalId].votes.push(votes);
 
-//     // Override the executor function
-//     function _executor()
-//         internal
-//         view
-//         override(Governor, GovernorTimelockControl)
-//         returns (address)
-//     {
-//         return owner;
-//     }
+        // !! Check Votes
+        emit Voted(proposalId, voter);
+    }
 
-//     // Custom implementation of the state function
-//     function state(
-//         uint256 proposalId
-//     )
-//         public
-//         view
-//         override(Governor, GovernorTimelockControl)
-//         returns (ProposalState)
-//     {
-//         Proposal storage proposal = proposals[proposalId];
-//         if (proposal.executed) {
-//             return ProposalState.Executed;
-//         } else if (proposal.canceled) {
-//             return ProposalState.Canceled;
-//         } else if (block.number < proposal.startBlock) {
-//             return ProposalState.Pending;
-//         } else if (block.number <= proposal.endBlock) {
-//             return ProposalState.Active;
-//         } else {
-//             return ProposalState.Expired;
-//         }
-//     }
+    // !! Below functions are not used in this example form Goveror
 
-//     // Distribute rewards to the winning entry and voters
-//     function distributeRewards(uint256 proposalId) internal {
-//         Proposal storage proposal = proposals[proposalId];
+    function _cancel(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) internal override(Governor, GovernorTimelockControl) returns (uint256) {
+        require(
+            proposals[proposalCounter].creator == owner,
+            "Unauthorized canceller"
+        );
+        proposals[proposalCounter].canceled = true;
 
-//         // Calculate the total reward for the proposal
-//         uint256 totalRewards = proposal.rewardAmount;
+        return proposalCounter;
+    }
 
-//         // Calculate the reward for the winning entry
-//         uint256 winnerReward = (totalRewards * 70) / 100;
-//         _rewardToken.transfer(proposal.winningEntry, winnerReward);
+    function _execute(
+        uint256 proposalId,
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) internal override(Governor, GovernorTimelockControl) {
+        require(
+            proposals[proposalId].creator == owner,
+            "Unauthorized executor"
+        );
+        proposals[proposalId].executed = true;
+    }
 
-//         // Calculate the reward for the voters
-//         uint256 voterRewards = (totalRewards * 30) / 100;
+    function _executor()
+        internal
+        view
+        override(Governor, GovernorTimelockControl)
+        returns (address)
+    {
+        return owner;
+    }
 
-//         for (uint256 i = 0; i < proposal.voters.length; i++) {
-//             address voter = proposal.voters[i];
-//             uint256 votes = proposal.votes[i];
-//             uint256 reward = (voterRewards * votes) / proposal.yesVotes;
-//             _rewardToken.transfer(voter, reward);
-//         }
+    function state(
+        uint256 proposalId
+    )
+        public
+        view
+        override(Governor, GovernorTimelockControl)
+        returns (ProposalState)
+    {
+        return super.state(proposalId);
+    }
 
-//         emit RewardsDistributed(
-//             proposalId,
-//             totalRewards,
-//             winnerReward,
-//             voterRewards
-//         );
-//     }
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(Governor, GovernorTimelockControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
 
-//     function supportsInterface(
-//         bytes4 interfaceId
-//     ) public view override(Governor, GovernorTimelockControl) returns (bool) {
-//         return super.supportsInterface(interfaceId);
-//     }
-// }
+    function proposalThreshold()
+        public
+        pure
+        override(Governor, GovernorSettings)
+        returns (uint256)
+    {
+        return 1; // Only one proposal is required to start voting
+    }
+}
