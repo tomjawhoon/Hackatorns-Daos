@@ -46,7 +46,7 @@ contract MyGovernor is
     // !! Campagine ID is not used in this example
 
     function createCampaign(
-        uint256 databaseId,
+        string memory databaseId,
         string memory description, // !! Discription of the proposal
         uint256 rewardAmount, // !! Ex 1000 APE COIN
         uint256 startBlock, // !! Time to start the proposal

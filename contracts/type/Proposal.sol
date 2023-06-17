@@ -20,7 +20,7 @@ struct Campaign {
     uint256 startBlock;
     uint256 endBlock;
     uint256 rewardAmount;
-    uint256 databaseId;
+    string databaseId;
 }
 
 

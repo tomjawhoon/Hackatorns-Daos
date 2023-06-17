@@ -35,12 +35,14 @@ export type CampaignStruct = {
   startBlock: PromiseOrValue<BigNumberish>;
   endBlock: PromiseOrValue<BigNumberish>;
   rewardAmount: PromiseOrValue<BigNumberish>;
+  databaseId: PromiseOrValue<BigNumberish>;
 };
 
 export type CampaignStructOutput = [
   string,
   BigNumber,
   BigNumber[],
+  BigNumber,
   BigNumber,
   BigNumber,
   BigNumber
@@ -51,6 +53,7 @@ export type CampaignStructOutput = [
   startBlock: BigNumber;
   endBlock: BigNumber;
   rewardAmount: BigNumber;
+  databaseId: BigNumber;
 };
 
 export type ProposalStruct = {
@@ -101,7 +104,7 @@ export interface MyGovernorInterface extends utils.Interface {
     "castVoteWithReasonAndParamsBySig(uint256,uint8,string,bytes,uint8,bytes32,bytes32)": FunctionFragment;
     "claimRewards(uint256,address,uint256)": FunctionFragment;
     "clock()": FunctionFragment;
-    "createCampaign(string,uint256,uint256,uint256)": FunctionFragment;
+    "createCampaign(uint256,string,uint256,uint256,uint256)": FunctionFragment;
     "eip712Domain()": FunctionFragment;
     "execute(address[],uint256[],bytes[],bytes32)": FunctionFragment;
     "getAllCampaigns()": FunctionFragment;
@@ -277,6 +280,7 @@ export interface MyGovernorInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "createCampaign",
     values: [
+      PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
@@ -956,6 +960,7 @@ export interface MyGovernor extends BaseContract {
     clock(overrides?: CallOverrides): Promise<[number]>;
 
     createCampaign(
+      databaseId: PromiseOrValue<BigNumberish>,
       description: PromiseOrValue<string>,
       rewardAmount: PromiseOrValue<BigNumberish>,
       startBlock: PromiseOrValue<BigNumberish>,
@@ -1242,6 +1247,7 @@ export interface MyGovernor extends BaseContract {
   clock(overrides?: CallOverrides): Promise<number>;
 
   createCampaign(
+    databaseId: PromiseOrValue<BigNumberish>,
     description: PromiseOrValue<string>,
     rewardAmount: PromiseOrValue<BigNumberish>,
     startBlock: PromiseOrValue<BigNumberish>,
@@ -1526,6 +1532,7 @@ export interface MyGovernor extends BaseContract {
     clock(overrides?: CallOverrides): Promise<number>;
 
     createCampaign(
+      databaseId: PromiseOrValue<BigNumberish>,
       description: PromiseOrValue<string>,
       rewardAmount: PromiseOrValue<BigNumberish>,
       startBlock: PromiseOrValue<BigNumberish>,
@@ -1968,6 +1975,7 @@ export interface MyGovernor extends BaseContract {
     clock(overrides?: CallOverrides): Promise<BigNumber>;
 
     createCampaign(
+      databaseId: PromiseOrValue<BigNumberish>,
       description: PromiseOrValue<string>,
       rewardAmount: PromiseOrValue<BigNumberish>,
       startBlock: PromiseOrValue<BigNumberish>,
@@ -2237,6 +2245,7 @@ export interface MyGovernor extends BaseContract {
     clock(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     createCampaign(
+      databaseId: PromiseOrValue<BigNumberish>,
       description: PromiseOrValue<string>,
       rewardAmount: PromiseOrValue<BigNumberish>,
       startBlock: PromiseOrValue<BigNumberish>,
