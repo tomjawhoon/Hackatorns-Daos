@@ -12,14 +12,14 @@ export default async function main() {
   const dealClient = DealClient.attach(DealClientAddr);
 
   const cid =
-    "baga6ea4seaqkxmkazzwmkcfe5bxwxxkyd5n2vyeindbj7nf2xxgnf7lw327rqei"; // Update Me Key -> Piece CID
+    "baga6ea4seaqkxmkazzwmkcfe5bxwxxkyd5n2vyeindbj7nf2xxgnf7lw327rqei"; // !! Update Me Key -> Piece CID
 
   const cidHexRaw = new CID(cid).toString("base16").substring(1);
 
-  const pieceSize = 1048576; // Update Me Key -> Piece Size
-  const carSize = 682740; // Update Me -> CAR Size
+  const pieceSize = 1048576; // !! Update Me Key -> Piece Size
+  const carSize = 682740; // !! Update Me -> CAR Size
   const locationRef =
-    "https://data-depot.lighthouse.storage/api/download/download_car?fileId=e000fca4-1af4-475a-a7b5-5615d047461e.car"; // Update Me Key -> URL
+    "https://data-depot.lighthouse.storage/api/download/download_car?fileId=e000fca4-1af4-475a-a7b5-5615d047461e.car"; //  !! Update Me Key -> URL
 
   const cidHex = "0x" + cidHexRaw;
   const verified = false;

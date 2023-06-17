@@ -4,10 +4,12 @@ import { getAddressList, saveAddresses } from "../utils/address";
 
 async function main() {
   const addressList = await getAddressList(hre.network.name);
-
+  
+  // !! Reward : 0x89B7A97F3610Aab7Da907340742873D0d4026453
   const rewardToken = addressList.RewardToken;
 
   // Deploy MyGovernor contract
+
   const MyGovernor = await ethers.getContractFactory("MyGovernor");
   const myGovernor = await MyGovernor.deploy(rewardToken);
   await myGovernor.deployed();
