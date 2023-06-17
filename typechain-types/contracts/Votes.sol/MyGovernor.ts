@@ -97,7 +97,7 @@ export interface MyGovernorInterface extends utils.Interface {
     "setVotingDelay(uint256)": FunctionFragment;
     "setVotingPeriod(uint256)": FunctionFragment;
     "state(uint256)": FunctionFragment;
-    "submitWork(bytes,string,address)": FunctionFragment;
+    "submitWork(bytes,uint256,string,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "token()": FunctionFragment;
     "updateQuorumNumerator(uint256)": FunctionFragment;
@@ -404,6 +404,7 @@ export interface MyGovernorInterface extends utils.Interface {
     functionFragment: "submitWork",
     values: [
       PromiseOrValue<BytesLike>,
+      PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<string>
     ]
@@ -1099,6 +1100,7 @@ export interface MyGovernor extends BaseContract {
 
     submitWork(
       cid: PromiseOrValue<BytesLike>,
+      id: PromiseOrValue<BigNumberish>,
       workDescription: PromiseOrValue<string>,
       owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1377,6 +1379,7 @@ export interface MyGovernor extends BaseContract {
 
   submitWork(
     cid: PromiseOrValue<BytesLike>,
+    id: PromiseOrValue<BigNumberish>,
     workDescription: PromiseOrValue<string>,
     owner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1655,6 +1658,7 @@ export interface MyGovernor extends BaseContract {
 
     submitWork(
       cid: PromiseOrValue<BytesLike>,
+      id: PromiseOrValue<BigNumberish>,
       workDescription: PromiseOrValue<string>,
       owner: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -2055,6 +2059,7 @@ export interface MyGovernor extends BaseContract {
 
     submitWork(
       cid: PromiseOrValue<BytesLike>,
+      id: PromiseOrValue<BigNumberish>,
       workDescription: PromiseOrValue<string>,
       owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -2320,6 +2325,7 @@ export interface MyGovernor extends BaseContract {
 
     submitWork(
       cid: PromiseOrValue<BytesLike>,
+      id: PromiseOrValue<BigNumberish>,
       workDescription: PromiseOrValue<string>,
       owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }

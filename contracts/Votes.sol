@@ -79,9 +79,13 @@ contract MyGovernor is
     function submitWork(
         bytes memory cid,
         // uint256 proposalId,
+        uint256 id,
         string memory workDescription,
         address owner
     ) external {
+        
+        Campaign storage campaign = campaigns[id];
+        Proposal storage proposal = proposals[proposalCounter];
         proposalCounter++;
         proposals[proposalCounter] = Proposal(
             proposalCounter,
@@ -95,7 +99,7 @@ contract MyGovernor is
             new uint256[](0) // Initialize the votes array
         );
 
-        Proposal storage proposal = proposals[proposalCounter];
+        campaign.proposalId.push(proposalCounter);
         require(!proposal.canceled, "Proposal was canceled");
         require(!proposal.executed, "Proposal was already executed");
         // proposal.winningEntry = owner;
