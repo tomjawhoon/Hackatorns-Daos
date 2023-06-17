@@ -587,8 +587,8 @@ export interface MyGovernorInterface extends utils.Interface {
 
   events: {
     "EIP712DomainChanged()": EventFragment;
+    "EventProposalCreated(uint256,address,string,uint256)": EventFragment;
     "ProposalCanceled(uint256)": EventFragment;
-    "ProposalCreated(uint256,address,string,uint256)": EventFragment;
     "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)": EventFragment;
     "ProposalExecuted(uint256)": EventFragment;
     "ProposalThresholdSet(uint256,uint256)": EventFragment;
@@ -604,13 +604,9 @@ export interface MyGovernorInterface extends utils.Interface {
   };
 
   getEvent(nameOrSignatureOrTopic: "EIP712DomainChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "EventProposalCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ProposalCanceled"): EventFragment;
-  getEvent(
-    nameOrSignatureOrTopic: "ProposalCreated(uint256,address,string,uint256)"
-  ): EventFragment;
-  getEvent(
-    nameOrSignatureOrTopic: "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)"
-  ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ProposalCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ProposalExecuted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ProposalThresholdSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "QuorumNumeratorUpdated"): EventFragment;
@@ -633,6 +629,20 @@ export type EIP712DomainChangedEvent = TypedEvent<
 export type EIP712DomainChangedEventFilter =
   TypedEventFilter<EIP712DomainChangedEvent>;
 
+export interface EventProposalCreatedEventObject {
+  proposalId: BigNumber;
+  creator: string;
+  description: string;
+  rewardAmount: BigNumber;
+}
+export type EventProposalCreatedEvent = TypedEvent<
+  [BigNumber, string, string, BigNumber],
+  EventProposalCreatedEventObject
+>;
+
+export type EventProposalCreatedEventFilter =
+  TypedEventFilter<EventProposalCreatedEvent>;
+
 export interface ProposalCanceledEventObject {
   proposalId: BigNumber;
 }
@@ -644,21 +654,7 @@ export type ProposalCanceledEvent = TypedEvent<
 export type ProposalCanceledEventFilter =
   TypedEventFilter<ProposalCanceledEvent>;
 
-export interface ProposalCreated_uint256_address_string_uint256_EventObject {
-  proposalId: BigNumber;
-  creator: string;
-  description: string;
-  rewardAmount: BigNumber;
-}
-export type ProposalCreated_uint256_address_string_uint256_Event = TypedEvent<
-  [BigNumber, string, string, BigNumber],
-  ProposalCreated_uint256_address_string_uint256_EventObject
->;
-
-export type ProposalCreated_uint256_address_string_uint256_EventFilter =
-  TypedEventFilter<ProposalCreated_uint256_address_string_uint256_Event>;
-
-export interface ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventObject {
+export interface ProposalCreatedEventObject {
   proposalId: BigNumber;
   proposer: string;
   targets: string[];
@@ -669,24 +665,22 @@ export interface ProposalCreated_uint256_address_address_array_uint256_array_str
   voteEnd: BigNumber;
   description: string;
 }
-export type ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_Event =
-  TypedEvent<
-    [
-      BigNumber,
-      string,
-      string[],
-      BigNumber[],
-      string[],
-      string[],
-      BigNumber,
-      BigNumber,
-      string
-    ],
-    ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventObject
-  >;
+export type ProposalCreatedEvent = TypedEvent<
+  [
+    BigNumber,
+    string,
+    string[],
+    BigNumber[],
+    string[],
+    string[],
+    BigNumber,
+    BigNumber,
+    string
+  ],
+  ProposalCreatedEventObject
+>;
 
-export type ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventFilter =
-  TypedEventFilter<ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_Event>;
+export type ProposalCreatedEventFilter = TypedEventFilter<ProposalCreatedEvent>;
 
 export interface ProposalExecutedEventObject {
   proposalId: BigNumber;
@@ -1690,15 +1684,22 @@ export interface MyGovernor extends BaseContract {
     "EIP712DomainChanged()"(): EIP712DomainChangedEventFilter;
     EIP712DomainChanged(): EIP712DomainChangedEventFilter;
 
-    "ProposalCanceled(uint256)"(proposalId?: null): ProposalCanceledEventFilter;
-    ProposalCanceled(proposalId?: null): ProposalCanceledEventFilter;
-
-    "ProposalCreated(uint256,address,string,uint256)"(
+    "EventProposalCreated(uint256,address,string,uint256)"(
       proposalId?: null,
       creator?: null,
       description?: null,
       rewardAmount?: null
-    ): ProposalCreated_uint256_address_string_uint256_EventFilter;
+    ): EventProposalCreatedEventFilter;
+    EventProposalCreated(
+      proposalId?: null,
+      creator?: null,
+      description?: null,
+      rewardAmount?: null
+    ): EventProposalCreatedEventFilter;
+
+    "ProposalCanceled(uint256)"(proposalId?: null): ProposalCanceledEventFilter;
+    ProposalCanceled(proposalId?: null): ProposalCanceledEventFilter;
+
     "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)"(
       proposalId?: null,
       proposer?: null,
@@ -1709,7 +1710,18 @@ export interface MyGovernor extends BaseContract {
       voteStart?: null,
       voteEnd?: null,
       description?: null
-    ): ProposalCreated_uint256_address_address_array_uint256_array_string_array_bytes_array_uint256_uint256_string_EventFilter;
+    ): ProposalCreatedEventFilter;
+    ProposalCreated(
+      proposalId?: null,
+      proposer?: null,
+      targets?: null,
+      values?: null,
+      signatures?: null,
+      calldatas?: null,
+      voteStart?: null,
+      voteEnd?: null,
+      description?: null
+    ): ProposalCreatedEventFilter;
 
     "ProposalExecuted(uint256)"(proposalId?: null): ProposalExecutedEventFilter;
     ProposalExecuted(proposalId?: null): ProposalExecutedEventFilter;

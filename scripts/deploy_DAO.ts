@@ -1,44 +1,31 @@
-// import { ethers } from 'hardhat';
-// import fs from 'fs';
+import { ethers } from "hardhat";
+import hre from "hardhat";
+import { getAddressList, saveAddresses } from "../utils/address";
 
-// async function main() {
-//   // Deploy RewardToken contract
-//   // const RewardToken = await ethers.getContractFactory('RewardToken');
-//   // const rewardToken = await RewardToken.deploy();
-//   // await rewardToken.deployed();
+async function main() {
+  const addressList = await getAddressList(hre.network.name);
 
-//   // console.log('RewardToken deployed to:', rewardToken.address);
+  const rewardToken = addressList.RewardToken;
 
-//   const rewardToken = "0x837abcA63D0A85275D08a648CBECE4168ab0ad37"
+  // Deploy MyGovernor contract
+  const MyGovernor = await ethers.getContractFactory("MyGovernor");
+  const myGovernor = await MyGovernor.deploy(rewardToken);
+  await myGovernor.deployed();
 
-//   // Deploy MyGovernor contract
-//   const MyGovernor = await ethers.getContractFactory('MyGovernor');
-//   const myGovernor = await MyGovernor.deploy(rewardToken);
-//   await myGovernor.deployed();
+  const DealClient = await ethers.getContractFactory("DealClient");
+  const dealClient = await DealClient.deploy();
+  await dealClient.deployed();
 
-//   console.log('MyGovernor deployed to:', myGovernor.address);
+  console.log(`MyGovernor deployed to ${myGovernor.address}`);
+  console.log(`DealClient deployed to ${dealClient.address}`);
 
-//   // Save deployment artifacts to JSON file
-//   const deploymentData = {
-//     // RewardToken: {
-//     //   address: rewardToken.address,
-//     // },
-//     MyGovernor: {
-//       address: myGovernor.address,
-//     },
-//   };
+  await saveAddresses(hre.network.name, {
+    MyGovernor: myGovernor.address,
+    DealClient: dealClient.address,
+  });
+}
 
-//   fs.writeFileSync(
-//     './deployments.json',
-//     JSON.stringify(deploymentData, null, 2)
-//   );
-
-//   console.log('Deployment artifacts saved to deployments.json');
-// }
-
-// main()
-//   .then(() => process.exit(0))
-//   .catch((error) => {
-//     console.error(error);
-//     process.exit(1);
-// });
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

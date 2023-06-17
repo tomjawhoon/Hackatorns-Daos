@@ -58,7 +58,7 @@ contract MyGovernor is
             endBlock, //  !! Set the end block
             rewardAmount // !! Set the reward amount
         );
-        emit ProposalCreated(
+        emit EventProposalCreated(
             proposalCounter,
             msg.sender,
             description,

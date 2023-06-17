@@ -5,4 +5,3 @@ export * as apeSol from "./Ape.sol";
 export * as votesSol from "./Votes.sol";
 export * as event from "./event";
 export { DealClient__factory } from "./DealClient__factory";
-export { TimeLock__factory } from "./TimeLock__factory";

@@ -74,7 +74,5 @@ export type { DealClient } from "./contracts/DealClient";
 export { DealClient__factory } from "./factories/contracts/DealClient__factory";
 export type { Events } from "./contracts/event/Events";
 export { Events__factory } from "./factories/contracts/event/Events__factory";
-export type { TimeLock } from "./contracts/TimeLock";
-export { TimeLock__factory } from "./factories/contracts/TimeLock__factory";
 export type { MyGovernor } from "./contracts/Votes.sol/MyGovernor";
 export { MyGovernor__factory } from "./factories/contracts/Votes.sol/MyGovernor__factory";

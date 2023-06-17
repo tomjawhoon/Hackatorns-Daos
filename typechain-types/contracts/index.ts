@@ -8,4 +8,3 @@ export type { votesSol };
 import type * as event from "./event";
 export type { event };
 export type { DealClient } from "./DealClient";
-export type { TimeLock } from "./TimeLock";
