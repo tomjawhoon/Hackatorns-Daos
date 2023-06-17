@@ -17,7 +17,7 @@ contract MyGovernor is
     GovernorCountingSimple,
     GovernorVotes,
     GovernorVotesQuorumFraction,
-    Events 
+    Events
 {
     mapping(uint256 => Proposal) private proposals;
 
@@ -43,7 +43,7 @@ contract MyGovernor is
     // Create a new project proposal
     // !! Campagine start and end blocks are not used in this example
     // !! Campagine ID is not used in this example
-    
+
     function createCampaign(
         string memory description, // !! Discription of the proposal
         uint256 rewardAmount, // !! Ex 1000 APE COIN
@@ -95,7 +95,6 @@ contract MyGovernor is
     // !! Proposal have CID ?
     function submitWork(
         bytes memory cid,
-        // uint256 proposalId,
         uint256 id,
         string memory workDescription,
         address owner
@@ -166,7 +165,7 @@ contract MyGovernor is
 
             // !! ถ้าเป็นผู้มาโหวตงาน สามารถ ได้รับ 30% ของเงินรางวัล
         } else if (isVoter(proposalId, claimer)) {
-            uint256 votes = getVotes(claimer, block.number);
+            uint256 votes = getVotes(claimer, block.timestamp);
             rewardAmount = (voterRewards * votes) / proposal.yesVotes;
         }
 
@@ -221,20 +220,20 @@ contract MyGovernor is
     // !! เวลาให้กดโหวดส่งเข้ามาตัวนี้นะ
     function vote(
         uint256 proposalId,
-        address voter,
+        address voter, // !! คนโหวต
         uint256 campaignId
     ) external {
         Campaign storage campaign = campaigns[campaignId];
         require(
-            block.number >= campaigns[campaignId].startBlock,
+            block.timestamp >= campaigns[campaignId].startBlock,
             "Campaign has not started yet"
         );
         require(
-            block.number <= campaigns[campaignId].endBlock,
+            block.timestamp <= campaigns[campaignId].endBlock,
             "Campaign has ended"
         );
 
-        uint256 votes = getVotes(voter, block.number);
+        uint256 votes = getVotes(voter, block.timestamp);
         require(votes > 0, "You do not have any voting power");
 
         require(!isVoter(proposalId, voter), "Already voted");
