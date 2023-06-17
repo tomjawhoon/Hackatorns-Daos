@@ -51,6 +51,10 @@ contract MyGovernor is
         uint256 endBlock // !! End to end the proposal
     ) external {
         campaignsCounter++;
+        // IERC20(cafeToken).approve(address(this), _tokenAmount);
+        
+        _rewardToken.transferFrom(msg.sender, address(this), rewardAmount);
+        
         campaigns[campaignsCounter] = Campaign(
             msg.sender, // !! Set the proposal creator as the sender
             campaignsCounter, // Initialize the campaign array
@@ -59,6 +63,7 @@ contract MyGovernor is
             endBlock, //  !! Set the end block
             rewardAmount // !! Set the reward amount
         );
+
         emit EventProposalCreated(
             proposalCounter,
             msg.sender,
@@ -83,7 +88,6 @@ contract MyGovernor is
         Proposal[] memory proposalsInCampaign = new Proposal[](
             proposalIds.length
         );
-
         for (uint256 i = 0; i < proposalIds.length; i++) {
             proposalsInCampaign[i] = proposals[proposalIds[i]];
         }
@@ -92,7 +96,6 @@ contract MyGovernor is
     }
 
     // !! Campagine start and end blocks are not used in this example
-    // !! Proposal have CID ?
     function submitWork(
         bytes memory cid,
         uint256 id,
@@ -159,18 +162,43 @@ contract MyGovernor is
 
         uint256 voterRewards = (totalRewards * 30) / 100;
         uint256 rewardAmount = 0;
-        // !! ถ้าเป็นคนสร้างงานสามารถ ได้รับ 70% ของเงินรางวัล
+
         if (proposal.creator == claimer) {
             rewardAmount = winnerReward;
-
-            // !! ถ้าเป็นผู้มาโหวตงาน สามารถ ได้รับ 30% ของเงินรางวัล
         } else if (isVoter(proposalId, claimer)) {
-            uint256 votes = getVotes(claimer, block.timestamp);
+            uint256 votes = 1;
             rewardAmount = (voterRewards * votes) / proposal.yesVotes;
         }
 
         return rewardAmount;
     }
+
+    // function calculateRewardAmount(
+    //     uint256 proposalId,
+    //     uint256 campaignId,
+    //     address claimer
+    // ) internal view returns (uint256) {
+    //     Campaign storage campaign = campaigns[campaignId];
+    //     uint256 winnerId = getWinner(campaignId);
+    //     Proposal storage proposal = proposals[winnerId];
+
+    //     uint256 totalRewards = campaign.rewardAmount;
+    //     uint256 winnerReward = (totalRewards * 70) / 100;
+
+    //     uint256 voterRewards = (totalRewards * 30) / 100;
+    //     uint256 rewardAmount = 0;
+    //     // !! ถ้าเป็นคนสร้างงานสามารถ ได้รับ 70% ของเงินรางวัล
+    //     if (proposal.creator == claimer) {
+    //         rewardAmount = winnerReward;
+
+    //         // !! ถ้าเป็นผู้มาโหวตงาน สามารถ ได้รับ 30% ของเงินรางวัล
+    //     } else if (isVoter(proposalId, claimer)) {
+    //         uint256 votes = getVotes(claimer, block.timestamp);
+    //         rewardAmount = (voterRewards * votes) / proposal.yesVotes;
+    //     }
+
+    //     return rewardAmount;
+    // }
 
     function getWinner(uint256 campaignId) public view returns (uint256) {
         Campaign storage campaign = campaigns[campaignId];
@@ -220,21 +248,22 @@ contract MyGovernor is
     // !! เวลาให้กดโหวดส่งเข้ามาตัวนี้นะ
     function vote(
         uint256 proposalId,
-        address voter, // !! คนโหวต
+        address voter,
         uint256 campaignId
     ) external {
         Campaign storage campaign = campaigns[campaignId];
-        require(
-            block.timestamp >= campaigns[campaignId].startBlock,
-            "Campaign has not started yet"
-        );
-        require(
-            block.timestamp <= campaigns[campaignId].endBlock,
-            "Campaign has ended"
-        );
+        // require(
+        //     block.timestamp >= campaigns[campaignId].startBlock,
+        //     "Campaign has not started yet"
+        // );
+        // require(
+        //     block.timestamp <= campaigns[campaignId].endBlock,
+        //     "Campaign has ended"
+        // );
+        // Assign the voting power directly
+        uint256 votes = 1;
 
-        uint256 votes = getVotes(voter, block.timestamp);
-        require(votes > 0, "You do not have any voting power");
+        // require(votes > 0, "You do not have any voting power");
 
         require(!isVoter(proposalId, voter), "Already voted");
 
