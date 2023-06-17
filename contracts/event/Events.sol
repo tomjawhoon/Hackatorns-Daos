@@ -9,7 +9,7 @@ contract Events {
         string workDescription
     );
 
-    event ProposalCreated(
+    event EventProposalCreated(
         uint256 proposalId,
         address creator,
         string description,

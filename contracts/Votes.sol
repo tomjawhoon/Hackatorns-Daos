@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
@@ -17,7 +17,7 @@ contract MyGovernor is
     GovernorCountingSimple,
     GovernorVotes,
     GovernorVotesQuorumFraction,
-    Events // Inherit from the Events contract
+    Events 
 {
     mapping(uint256 => Proposal) private proposals;
 
@@ -58,7 +58,7 @@ contract MyGovernor is
             endBlock, //  !! Set the end block
             rewardAmount // !! Set the reward amount
         );
-        emit ProposalCreated(
+        emit EventProposalCreated(
             proposalCounter,
             msg.sender,
             description,
