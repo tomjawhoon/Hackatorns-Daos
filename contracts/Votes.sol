@@ -74,6 +74,22 @@ contract MyGovernor is
         return allCampaigns;
     }
 
+    function getProposalsInCampaign(
+        uint256 campaignId
+    ) public view returns (Proposal[] memory) {
+        Campaign storage campaign = campaigns[campaignId];
+        uint256[] memory proposalIds = campaign.proposalId;
+        Proposal[] memory proposalsInCampaign = new Proposal[](
+            proposalIds.length
+        );
+
+        for (uint256 i = 0; i < proposalIds.length; i++) {
+            proposalsInCampaign[i] = proposals[proposalIds[i]];
+        }
+
+        return proposalsInCampaign;
+    }
+
     // !! Campagine start and end blocks are not used in this example
     // !! Proposal have CID ?
     function submitWork(
@@ -83,7 +99,6 @@ contract MyGovernor is
         string memory workDescription,
         address owner
     ) external {
-        
         Campaign storage campaign = campaigns[id];
         Proposal storage proposal = proposals[proposalCounter];
         proposalCounter++;
@@ -157,23 +172,6 @@ contract MyGovernor is
         return rewardAmount;
     }
 
-    // !! Version Nong Mah
-    // function getWinner(uint256 campaignId) public view returns (uint256) {
-    //     Campaign storage campaign = campaigns[campaignId];
-    //     uint256 bestScore = 0;
-    //     uint256 winnerId;
-    //     // Proposal storage proposal = proposals[campaign.proposalId];
-    //     for (uint256 i = 0; i < campaign.proposalId.length; i++) {
-    //         Proposal storage proposal = proposals[i];
-    //         winnerId = proposal.proposalId;
-    //         if (proposal.voters.length > bestScore) {
-    //             bestScore = proposal.voters.length;
-    //             winnerId = proposal.proposalId;
-    //         }
-    //     }
-    //     return winnerId;
-    // }
-
     function getWinner(uint256 campaignId) public view returns (uint256) {
         Campaign storage campaign = campaigns[campaignId];
         uint256 bestScore = 0;
@@ -246,7 +244,6 @@ contract MyGovernor is
         proposals[proposalId].votes.push(votes);
 
         // !! Check Votes
-        // emit VoteRecorded(proposalId, voter, campaignId, votes);
         emit Voted(proposalId, voter);
     }
 

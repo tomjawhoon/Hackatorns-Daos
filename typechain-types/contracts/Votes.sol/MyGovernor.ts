@@ -53,6 +53,40 @@ export type CampaignStructOutput = [
   rewardAmount: BigNumber;
 };
 
+export type ProposalStruct = {
+  proposalId: PromiseOrValue<BigNumberish>;
+  creator: PromiseOrValue<string>;
+  description: PromiseOrValue<string>;
+  yesVotes: PromiseOrValue<BigNumberish>;
+  noVotes: PromiseOrValue<BigNumberish>;
+  executed: PromiseOrValue<boolean>;
+  canceled: PromiseOrValue<boolean>;
+  voters: PromiseOrValue<string>[];
+  votes: PromiseOrValue<BigNumberish>[];
+};
+
+export type ProposalStructOutput = [
+  BigNumber,
+  string,
+  string,
+  BigNumber,
+  BigNumber,
+  boolean,
+  boolean,
+  string[],
+  BigNumber[]
+] & {
+  proposalId: BigNumber;
+  creator: string;
+  description: string;
+  yesVotes: BigNumber;
+  noVotes: BigNumber;
+  executed: boolean;
+  canceled: boolean;
+  voters: string[];
+  votes: BigNumber[];
+};
+
 export interface MyGovernorInterface extends utils.Interface {
   functions: {
     "BALLOT_TYPEHASH()": FunctionFragment;
@@ -73,6 +107,7 @@ export interface MyGovernorInterface extends utils.Interface {
     "getAllCampaigns()": FunctionFragment;
     "getCampaignEndTime(uint256)": FunctionFragment;
     "getCampaignStartTime(uint256)": FunctionFragment;
+    "getProposalsInCampaign(uint256)": FunctionFragment;
     "getVotes(address,uint256)": FunctionFragment;
     "getVotesWithParams(address,uint256,bytes)": FunctionFragment;
     "getWinner(uint256)": FunctionFragment;
@@ -127,6 +162,7 @@ export interface MyGovernorInterface extends utils.Interface {
       | "getAllCampaigns"
       | "getCampaignEndTime"
       | "getCampaignStartTime"
+      | "getProposalsInCampaign"
       | "getVotes"
       | "getVotesWithParams"
       | "getWinner"
@@ -270,6 +306,10 @@ export interface MyGovernorInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getCampaignStartTime",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getProposalsInCampaign",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
@@ -491,6 +531,10 @@ export interface MyGovernorInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getCampaignStartTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getProposalsInCampaign",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getVotes", data: BytesLike): Result;
@@ -961,6 +1005,11 @@ export interface MyGovernor extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    getProposalsInCampaign(
+      campaignId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[ProposalStructOutput[]]>;
+
     getVotes(
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
@@ -1240,6 +1289,11 @@ export interface MyGovernor extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  getProposalsInCampaign(
+    campaignId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<ProposalStructOutput[]>;
+
   getVotes(
     account: PromiseOrValue<string>,
     timepoint: PromiseOrValue<BigNumberish>,
@@ -1518,6 +1572,11 @@ export interface MyGovernor extends BaseContract {
       campaignId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getProposalsInCampaign(
+      campaignId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<ProposalStructOutput[]>;
 
     getVotes(
       account: PromiseOrValue<string>,
@@ -1926,6 +1985,11 @@ export interface MyGovernor extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getProposalsInCampaign(
+      campaignId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getVotes(
       account: PromiseOrValue<string>,
       timepoint: PromiseOrValue<BigNumberish>,
@@ -2186,6 +2250,11 @@ export interface MyGovernor extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     getCampaignStartTime(
+      campaignId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getProposalsInCampaign(
       campaignId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
