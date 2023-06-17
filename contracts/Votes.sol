@@ -57,7 +57,7 @@ contract MyGovernor is
 
         campaigns[campaignsCounter] = Campaign(
             msg.sender, // !! Set the proposal creator as the sender
-            campaignsCounter, // Initialize the campaign array
+            campaignsCounter, 
             new uint256[](0), // !! Set the campaign ID
             startBlock, // !! Set the start block
             endBlock, //  !! Set the end block
