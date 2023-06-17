@@ -131,12 +131,12 @@ contract MyGovernor is
         address claimer,
         uint256 proposalId
     ) external {
+        // require(
+        //     block.timestamp >= campaigns[campaignId].startBlock,
+        //     "Campaign has not started yet"
+        // );
         require(
-            block.timestamp >= campaigns[campaignId].startBlock,
-            "Campaign has not started yet"
-        );
-        require(
-            block.timestamp <= campaigns[campaignId].endBlock,
+            block.timestamp >= campaigns[campaignId].endBlock,
             "Campaign has ended"
         );
         Campaign storage campaign = campaigns[campaignId];
@@ -180,33 +180,6 @@ contract MyGovernor is
 
         return rewardAmount;
     }
-
-    // function calculateRewardAmount(
-    //     uint256 proposalId,
-    //     uint256 campaignId,
-    //     address claimer
-    // ) internal view returns (uint256) {
-    //     Campaign storage campaign = campaigns[campaignId];
-    //     uint256 winnerId = getWinner(campaignId);
-    //     Proposal storage proposal = proposals[winnerId];
-
-    //     uint256 totalRewards = campaign.rewardAmount;
-    //     uint256 winnerReward = (totalRewards * 70) / 100;
-
-    //     uint256 voterRewards = (totalRewards * 30) / 100;
-    //     uint256 rewardAmount = 0;
-    //     // !! ถ้าเป็นคนสร้างงานสามารถ ได้รับ 70% ของเงินรางวัล
-    //     if (proposal.creator == claimer) {
-    //         rewardAmount = winnerReward;
-
-    //         // !! ถ้าเป็นผู้มาโหวตงาน สามารถ ได้รับ 30% ของเงินรางวัล
-    //     } else if (isVoter(proposalId, claimer)) {
-    //         uint256 votes = getVotes(claimer, block.timestamp);
-    //         rewardAmount = (voterRewards * votes) / proposal.yesVotes;
-    //     }
-
-    //     return rewardAmount;
-    // }
 
     function getWinner(uint256 campaignId) public view returns (uint256) {
         Campaign storage campaign = campaigns[campaignId];
