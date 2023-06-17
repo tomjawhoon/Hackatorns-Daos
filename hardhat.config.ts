@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        version: "0.8.9",
+        version: "0.8.7",
         settings: {
           optimizer: {
             enabled: true,
@@ -80,6 +80,11 @@ const config: HardhatUserConfig = {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
       accounts: getAccounts(),
     },
+
+    filecoin: {
+      url: `https://api.calibration.node.glif.io/rpc/v1`,
+      accounts: getAccounts(),
+    }
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

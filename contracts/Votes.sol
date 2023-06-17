@@ -17,7 +17,6 @@ contract MyGovernor is
     GovernorCountingSimple,
     GovernorVotes,
     GovernorVotesQuorumFraction,
-    GovernorTimelockControl,
     Events // Inherit from the Events contract
 {
     mapping(uint256 => Proposal) private proposals;
@@ -30,14 +29,12 @@ contract MyGovernor is
     ERC20 private _rewardToken; // Declare the ERC20 token contract variable
 
     constructor(
-        address rewardToken, // Pass the ERC20 token contract address during deployment
-        TimelockController _timelock
+        address rewardToken // Pass the ERC20 token contract address during deployment
     )
         Governor("MyGovernor")
         GovernorSettings(7200 /* 1 day */, 7200 /* 1 day */, 0)
         GovernorVotes(IVotes(rewardToken)) // Pass the reward token address to the GovernorVotes constructor
         GovernorVotesQuorumFraction(4)
-        GovernorTimelockControl(_timelock)
     {
         owner = msg.sender; // Set the contract deployer as the owner
         _rewardToken = ERC20(rewardToken); // Initialize the ERC20 token contract
@@ -245,7 +242,7 @@ contract MyGovernor is
         proposals[proposalId].votes.push(votes);
 
         // !! Check Votes
-        emit VoteRecorded(proposalId, voter, campaignId, votes);
+        // emit VoteRecorded(proposalId, voter, campaignId, votes);
         emit Voted(proposalId, voter);
     }
 
@@ -256,7 +253,7 @@ contract MyGovernor is
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) returns (uint256) {
+    ) internal override(Governor) returns (uint256) {
         require(
             proposals[proposalCounter].creator == owner,
             "Unauthorized canceller"
@@ -272,7 +269,7 @@ contract MyGovernor is
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) {
+    ) internal override(Governor) {
         require(
             proposals[proposalId].creator == owner,
             "Unauthorized executor"
@@ -280,29 +277,19 @@ contract MyGovernor is
         proposals[proposalId].executed = true;
     }
 
-    function _executor()
-        internal
-        view
-        override(Governor, GovernorTimelockControl)
-        returns (address)
-    {
+    function _executor() internal view override(Governor) returns (address) {
         return owner;
     }
 
     function state(
         uint256 proposalId
-    )
-        public
-        view
-        override(Governor, GovernorTimelockControl)
-        returns (ProposalState)
-    {
+    ) public view override(Governor) returns (ProposalState) {
         return super.state(proposalId);
     }
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(Governor, GovernorTimelockControl) returns (bool) {
+    ) public view override(Governor) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
