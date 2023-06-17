@@ -20,7 +20,7 @@ contract MyGovernor is
     Events
 {
     mapping(uint256 => Proposal) private proposals;
-
+    mapping(address => bool) hasClaimedReward;
     mapping(uint256 => Campaign) private campaigns;
     // uint256 proposalId ;
     uint256 campaignsCounter;
@@ -29,7 +29,7 @@ contract MyGovernor is
     ERC20 private _rewardToken; // Declare the ERC20 token contract variable
 
     constructor(
-        address rewardToken // Pass the ERC20 token contract address during deployment
+        address rewardToken
     )
         Governor("MyGovernor")
         GovernorSettings(7200 /* 1 day */, 7200 /* 1 day */, 0)
@@ -38,6 +38,7 @@ contract MyGovernor is
     {
         owner = msg.sender; // Set the contract deployer as the owner
         _rewardToken = ERC20(rewardToken); // Initialize the ERC20 token contract
+        hasClaimedReward[address(0)] = false; // Default value for the hasClaimedReward mapping
     }
 
     // Create a new project proposal
@@ -131,10 +132,6 @@ contract MyGovernor is
         address claimer,
         uint256 proposalId
     ) external {
-        // require(
-        //     block.timestamp >= campaigns[campaignId].startBlock,
-        //     "Campaign has not started yet"
-        // );
         require(
             block.timestamp >= campaigns[campaignId].endBlock,
             "Campaign has ended"
@@ -154,6 +151,7 @@ contract MyGovernor is
             "Insufficient contract balance"
         );
         _rewardToken.transfer(claimer, rewardAmount);
+        hasClaimedReward[claimer] = true;
     }
 
     function calculateRewardAmount(
@@ -171,9 +169,9 @@ contract MyGovernor is
         uint256 voterRewards = (totalRewards * 30) / 100;
         uint256 rewardAmount = 0;
 
-        if (proposal.creator == claimer) {
+        if (proposal.creator == claimer && !hasClaimedReward[claimer]) {
             rewardAmount = winnerReward;
-        } else if (isVoter(proposalId, claimer)) {
+        } else if (isVoter(proposalId, claimer) && !hasClaimedReward[claimer]) {
             uint256 votes = 1;
             rewardAmount = (voterRewards * votes) / proposal.yesVotes;
         }
