@@ -51,10 +51,8 @@ contract MyGovernor is
         uint256 endBlock // !! End to end the proposal
     ) external {
         campaignsCounter++;
-        // IERC20(cafeToken).approve(address(this), _tokenAmount);
-        
         _rewardToken.transferFrom(msg.sender, address(this), rewardAmount);
-        
+
         campaigns[campaignsCounter] = Campaign(
             msg.sender, // !! Set the proposal creator as the sender
             campaignsCounter, // Initialize the campaign array
@@ -133,18 +131,28 @@ contract MyGovernor is
         address claimer,
         uint256 proposalId
     ) external {
-        Campaign storage campaigns = campaigns[campaignId];
+        require(
+            block.timestamp >= campaigns[campaignId].startBlock,
+            "Campaign has not started yet"
+        );
+        require(
+            block.timestamp <= campaigns[campaignId].endBlock,
+            "Campaign has ended"
+        );
+        Campaign storage campaign = campaigns[campaignId];
         uint256 winnerId = getWinner(campaignId);
         Proposal storage proposal = proposals[winnerId];
-        require(proposal.creator == claimer, "Unauthorized claimer");
-
         uint256 rewardAmount = calculateRewardAmount(
             proposalId,
             campaignId,
             claimer
         );
         require(rewardAmount > 0, "No rewards to claim");
-
+        uint256 contractBalance = _rewardToken.balanceOf(address(this));
+        require(
+            contractBalance >= rewardAmount,
+            "Insufficient contract balance"
+        );
         _rewardToken.transfer(claimer, rewardAmount);
     }
 
@@ -204,7 +212,6 @@ contract MyGovernor is
         Campaign storage campaign = campaigns[campaignId];
         uint256 bestScore = 0;
         uint256 winnerId;
-
         for (uint256 i = 0; i < campaign.proposalId.length; i++) {
             Proposal storage proposal = proposals[campaign.proposalId[i]];
             if (proposal.voters.length > bestScore) {
@@ -212,8 +219,7 @@ contract MyGovernor is
                 winnerId = proposal.proposalId;
             }
         }
-
-        return bestScore;
+        return winnerId;
     }
 
     function getCampaignStartTime(
@@ -252,19 +258,16 @@ contract MyGovernor is
         uint256 campaignId
     ) external {
         Campaign storage campaign = campaigns[campaignId];
-        // require(
-        //     block.timestamp >= campaigns[campaignId].startBlock,
-        //     "Campaign has not started yet"
-        // );
-        // require(
-        //     block.timestamp <= campaigns[campaignId].endBlock,
-        //     "Campaign has ended"
-        // );
-        // Assign the voting power directly
+        require(
+            block.timestamp >= campaigns[campaignId].startBlock,
+            "Campaign has not started yet"
+        );
+        require(
+            block.timestamp <= campaigns[campaignId].endBlock,
+            "Campaign has ended"
+        );
+
         uint256 votes = 1;
-
-        // require(votes > 0, "You do not have any voting power");
-
         require(!isVoter(proposalId, voter), "Already voted");
 
         proposals[proposalId].yesVotes += votes;
