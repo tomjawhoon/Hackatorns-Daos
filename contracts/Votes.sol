@@ -41,9 +41,7 @@ contract MyGovernor is
         hasClaimedReward[address(0)] = false; // Default value for the hasClaimedReward mapping
     }
 
-    // Create a new project proposal
     // !! Campagine start and end blocks are not used in this example
-    // !! Campagine ID is not used in this example
 
     function createCampaign(
         string memory databaseId,
@@ -125,7 +123,6 @@ contract MyGovernor is
         proposal.executed = true;
         emit WorkSubmitted(cid, proposalCounter, owner, workDescription);
 
-        // distributeRewards(proposalId);
     }
 
     // !! Campagine start and end blocks are not used in this example

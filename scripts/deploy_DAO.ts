@@ -14,9 +14,9 @@ async function main() {
   const myGovernor = await MyGovernor.deploy(rewardToken);
   await myGovernor.deployed();
 
-  // const DealClient = await ethers.getContractFactory("DealClient");
-  // const dealClient = await DealClient.deploy();
-  // await dealClient.deployed();
+  const DealClient = await ethers.getContractFactory("DealClient");
+  const dealClient = await DealClient.deploy();
+  await dealClient.deployed();
 
   console.log(`MyGovernor deployed to ${myGovernor.address}`);
   // console.log(`DealClient deployed to ${dealClient.address}`);

@@ -7,10 +7,10 @@ struct Proposal {
     string description;
     uint256 yesVotes;
     uint256 noVotes;
-    bool executed; //  !! ข้อเสนอที่สร้างยังไม่ได้ดำเนินการ
-    bool canceled; // !! ข้อเสนอที่สร้างยังไม่ได้ยกเลิก
-    address[] voters; // !! ผู้เข้ามาโหวตเนอะ
-    uint256[] votes; // !!
+    bool executed;
+    bool canceled; 
+    address[] voters; 
+    uint256[] votes; 
 }
 
 struct Campaign {
