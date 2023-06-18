@@ -19,11 +19,11 @@ async function main() {
   await dealClient.deployed();
 
   console.log(`MyGovernor deployed to ${myGovernor.address}`);
-  // console.log(`DealClient deployed to ${dealClient.address}`);
+  console.log(`DealClient deployed to ${dealClient.address}`);
 
   await saveAddresses(hre.network.name, {
     MyGovernor: myGovernor.address,
-    // DealClient: dealClient.address,
+    DealClient: dealClient.address,
   });
 }
 

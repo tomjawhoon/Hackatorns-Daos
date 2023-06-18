@@ -22,7 +22,6 @@ contract MyGovernor is
     mapping(uint256 => Proposal) private proposals;
     mapping(address => bool) hasClaimedReward;
     mapping(uint256 => Campaign) private campaigns;
-    // uint256 proposalId ;
     uint256 campaignsCounter;
     uint256 proposalCounter;
     address private owner;
@@ -33,15 +32,14 @@ contract MyGovernor is
     )
         Governor("MyGovernor")
         GovernorSettings(7200 /* 1 day */, 7200 /* 1 day */, 0)
-        GovernorVotes(IVotes(rewardToken)) // Pass the reward token address to the GovernorVotes constructor
+        GovernorVotes(IVotes(rewardToken))
         GovernorVotesQuorumFraction(4)
     {
-        owner = msg.sender; // Set the contract deployer as the owner
-        _rewardToken = ERC20(rewardToken); // Initialize the ERC20 token contract
-        hasClaimedReward[address(0)] = false; // Default value for the hasClaimedReward mapping
+        owner = msg.sender; 
+        _rewardToken = ERC20(rewardToken); 
+        hasClaimedReward[address(0)] = false; 
     }
 
-    // !! Campagine start and end blocks are not used in this example
 
     function createCampaign(
         string memory databaseId,
@@ -94,7 +92,6 @@ contract MyGovernor is
         return proposalsInCampaign;
     }
 
-    // !! Campagine start and end blocks are not used in this example
     function submitWork(
         bytes memory cid,
         uint256 id,
@@ -125,7 +122,6 @@ contract MyGovernor is
 
     }
 
-    // !! Campagine start and end blocks are not used in this example
     function claimRewards(
         uint256 campaignId,
         address claimer,
@@ -209,7 +205,7 @@ contract MyGovernor is
     }
 
     function isVoter(
-        uint256 proposalId, //!! proposalCounter
+        uint256 proposalId, 
         address voter
     ) internal view returns (bool) {
         Proposal storage proposal = proposals[proposalId];
@@ -221,7 +217,6 @@ contract MyGovernor is
         return false;
     }
 
-    // !! เวลาให้กดโหวดส่งเข้ามาตัวนี้นะ
     function vote(
         uint256 proposalId,
         address voter,
@@ -249,7 +244,6 @@ contract MyGovernor is
         emit Voted(proposalId, voter);
     }
 
-    // !! Below functions are not used in this example form Goveror
 
     function _cancel(
         address[] memory targets,
@@ -302,6 +296,6 @@ contract MyGovernor is
         override(Governor, GovernorSettings)
         returns (uint256)
     {
-        return 1; // Only one proposal is required to start voting
+        return 1;
     }
 }

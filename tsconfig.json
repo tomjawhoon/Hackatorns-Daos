@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["./src", "./scripts", "./test"],//only the "scripts" part.
+  "include": ["./src", "./scripts", "./test", "Notdoing/deployandTest.ts"],//only the "scripts" part.
   "files": ["./hardhat.config.ts"]
 }
 
